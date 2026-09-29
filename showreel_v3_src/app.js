@@ -494,23 +494,43 @@ function sSpec(ctx, t) {                         // beats 68-72
   reveal(ctx, '初步跡象，仍待 6PPD 標準品比對', rx, 812, { t, t0: vv(40.25), font: fS(700, 24), size: 24, color: C.mute, stagger: 0.02 });
 }
 
-// ================================================================ 7 next step (beats 72-76)
-function sOutlook(ctx, t) {
-  kicker(ctx, 140, 170, '07 — NEXT STEP', t, s(72));
-  reveal(ctx, '目前：開放環境收集效率約 28%', 140, 300, { t, t0: s(72.1), font: fS(700, 36), size: 36, color: C.mute, stagger: 0.025 });
-  reveal(ctx, '下一步：加裝導流罩', 140, 430, { t, t0: s(72.8), font: fS(900, 72), size: 72, color: C.acc, stagger: 0.05, dur: 1 });
-  reveal(ctx, '把粉塵集中導入極板通道，', 140, 510, { t, t0: s(73.6), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
-  reveal(ctx, '並以 6PPD 標準品確認化學關聯。', 140, 562, { t, t0: s(74.3), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
-  // shroud drawing
-  const px0 = 1380, px1 = 1780, pt = 560, pb = 700, p = tw(t, s(72.4), s(73.6), E.ioC);
-  ctx.save(); ctx.lineWidth = 2; ctx.strokeStyle = C.acc;
-  for (const y of [pt - 18, pb]) { poly(ctx, rectPts(px0, y, px1 - px0, 18), p, true); hatch(ctx, px0, y, px1 - px0, 18, 9, rgba(C.acc, 0.5), p); }
-  ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; poly(ctx, [[1040, 360], [1240, 420], [px0, pt - 18]], tw(t, s(72.8), s(73.8), E.ioC)); poly(ctx, [[1040, 900], [1240, 840], [px0, pb + 18]], tw(t, s(72.8), s(73.8), E.ioC));
-  ctx.restore();
-  txt(ctx, '導流罩', 1150, 360, fS(900, 28), C.ink, 'center', tw(t, s(73.6), s(74.2)));
-  for (let i = 0; i < 90; i++) { const ts = s(73.4) + i * 0.025; if (ts > t) break; const y0 = 400 + hash(i * 3.3) * 460, a = t - ts, x = 1060 + a * 360; if (x > px1) continue;
-    const u = clamp((x - 1060) / (px0 - 1060)), yc = (pt + pb) / 2, y = lerp(y0, yc + (y0 - 630) * 0.22, E.ioC(u));
-    ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(x, y, 2.6, 0, TAU); ctx.fill(); }
+// ================================================================ 7 hub motor module (beats 72-76)
+function sHubMotor(ctx, t) {
+  kicker(ctx, 140, 170, '07 — HUB MOTOR MODULE', t, s(72));
+  reveal(ctx, '電動腳踏車驅動輪 · 架設於專用支架', 140, 300, { t, t0: s(72.1), font: fS(700, 36), size: 36, color: C.mute, stagger: 0.02 });
+  reveal(ctx, '我們的輪轂馬達模組', 140, 430, { t, t0: s(72.4), font: fS(900, 72), size: 72, color: C.acc, stagger: 0.05, dur: 1 });
+  reveal(ctx, '輪胎摩擦砂紙產生粉塵，', 140, 510, { t, t0: s(73.1), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
+  reveal(ctx, '捕捉裝置鎖固於馬達後方。', 140, 562, { t, t0: s(73.6), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
+  // spec chips
+  [['48 V', '輪轂馬達'], ['350', 'RPM 最高轉速'], ['Ø 50', 'cm 輪胎外徑'], ['≈ 33', 'km/h 等效車速']].forEach(([v, l], i) => {
+    const x = 140 + i * 220, t0 = s(73.4) + i * 0.1, p = tw(t, t0, t0 + 0.5, E.ioC);
+    ctx.save(); ctx.strokeStyle = i === 1 ? C.acc : C.line; ctx.lineWidth = 1.5; seg(ctx, x, 660, x + 190, 660, p); ctx.restore();
+    reveal(ctx, v, x, 730, { t, t0: t0 + 0.05, font: fM(600, 48), size: 48, color: i === 1 ? C.acc : C.ink, stagger: 0.03 });
+    txt(ctx, l, x, 772, fS(700, 22), C.mute, 'left', tw(t, t0 + 0.2, t0 + 0.6)); });
+  // rig drawing: stand, wheel, sandpaper, capture device behind the motor
+  const cx = 1500, cy = 500, R = 200, gy = cy + R, base = 900;
+  const sp = tw(t, s(72), s(72.9), E.ioC);
+  ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = C.mute; ctx.lineWidth = 2;
+  seg(ctx, 1290, base, 1710, base, sp); poly(ctx, [[1330, base], [cx, cy], [1670, base]], sp);
+  ctx.strokeStyle = C.ink2; poly(ctx, rectPts(1360, gy, 280, 22), sp, true); hatch(ctx, 1360, gy, 280, 22, 8, rgba(C.ink, 0.35), sp);
+  ctx.strokeStyle = C.dim; ctx.lineWidth = 1.5; poly(ctx, rectPts(1380, gy + 22, 240, base - gy - 22), sp, true); ctx.restore();
+  txt(ctx, '砂紙', 1650, gy + 18, fS(700, 22), C.mute, 'left', tw(t, s(72.6), s(73.1)));
+  tireLine(ctx, cx, cy, R, t * 8, t, s(72) - 0.3, 0.8);
+  ctx.save(); ctx.lineCap = 'round'; for (let k = 0; k < 2; k++) { const p = tw(t, s(73) + k * 0.1, s(73.5) + k * 0.1); if (p <= 0) continue; ctx.strokeStyle = k === 0 ? C.acc : rgba(C.acc, 0.5); ctx.lineWidth = 3 - k; const a0 = t * (4 + k * 2) + k; arc(ctx, cx, cy, R + 24 + k * 18, a0, a0 + PI * (0.6 + k * 0.2) * p, 1); } ctx.restore();
+  dim(ctx, cx - R, cy - R - 60, cx + R, cy - R - 60, 'Ø 50 cm', tw(t, s(72.8), s(73.6), E.lin), C.mute, 0, fM(500, 22));
+  { const hl = tw(t, s(73.2), s(73.8)); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 1.2; poly(ctx, [[cx + 50, cy - 50], [cx + 150, cy - 170], [cx + 200, cy - 170]], hl); ctx.restore();
+    txt(ctx, 'HUB MOTOR · 48 V', cx + 208, cy - 164, fM(500, 20), C.acc, 'left', hl, 2); }
+  // capture device, mounted behind the motor
+  const bx = 1150, by = 610, bw = 130, bh = 110, dp = tw(t, s(72.8), s(73.5), E.ioC);
+  ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; poly(ctx, rectPts(bx, by, bw, bh), dp, true);
+  ctx.strokeStyle = C.acc; ctx.lineWidth = 3; for (let k = 0; k < 4; k++) seg(ctx, bx + 26 + k * 26, by + 16, bx + 26 + k * 26, by + bh - 16, tw(t, s(73) + k * 0.06, s(73.4) + k * 0.06, E.ioC));
+  ctx.strokeStyle = C.mute; ctx.lineWidth = 1.5; poly(ctx, [[bx + bw, by + bh / 2], [cx - R * 0.72, cy + 20]], dp); ctx.restore();
+  txt(ctx, '捕捉裝置', bx + bw / 2, by - 22, fS(900, 28), C.ink, 'center', tw(t, s(73.3), s(73.9)));
+  // dust flung off the contact patch into the plates
+  for (let i = 0; i < 110; i++) { const ts = s(73.2) + i * 0.02; if (ts > t) break; const a = t - ts, life = 0.8 + hash(i * 2.7) * 0.3, u = a / life; if (u >= 1) continue;
+    const x0 = cx - 30, y0 = gy - 6, x1 = bx + 20 + hash(i * 1.9) * (bw - 40), y1 = by + 20 + hash(i * 4.3) * (bh - 40), e = E.outC(u);
+    const x = lerp(x0, x1, e), y = lerp(y0, y1, e) - Math.sin(PI * e) * (40 + hash(i * 6.1) * 90);
+    ctx.fillStyle = rgba(C.acc, 0.9 * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 1.6 + hash(i * 3.1) * 1.8, 0, TAU); ctx.fill(); }
 }
 
 // ================================================================ end card (beats 76-80)
@@ -536,13 +556,13 @@ const CUTS = Object.values(CUT).map(b => B(b));
 const HW = 0.3;
 const wipeX = (t, tc) => W * E.ioC(P(t, tc - HW, tc + HW));
 const SCENES = [[0, CUT.problemA, sIntro], [CUT.problemA, CUT.problemB, sProblemA], [CUT.problemB, CUT.ppd, sProblemB], [CUT.ppd, CUT.limits, sPPD], [CUT.limits, CUT.physics, sLimits], [CUT.physics, CUT.device, sPhysics],
-  [CUT.device, CUT.safety, sDevice], [CUT.safety, CUT.stat, sSafety], [CUT.stat, CUT.dyn, sStatic], [CUT.dyn, CUT.spec, sDynamic], [CUT.spec, CUT.outlook, sSpec], [CUT.outlook, CUT.end, sOutlook], [CUT.end, 80.4, sEnd]].map(([a, b, f]) => [B(a), B(b), f]);
+  [CUT.device, CUT.safety, sDevice], [CUT.safety, CUT.stat, sSafety], [CUT.stat, CUT.dyn, sStatic], [CUT.dyn, CUT.spec, sDynamic], [CUT.spec, CUT.outlook, sSpec], [CUT.outlook, CUT.end, sHubMotor], [CUT.end, 80.4, sEnd]].map(([a, b, f]) => [B(a), B(b), f]);
 function scanLine(ctx, t) {
   for (const tc of CUTS) { if (t < tc - HW || t > tc + HW) continue; const x = wipeX(t, tc);
     const g = ctx.createLinearGradient(x - 160, 0, x, 0); g.addColorStop(0, 'rgba(255,138,0,0)'); g.addColorStop(1, 'rgba(255,138,0,0.12)'); ctx.fillStyle = g; ctx.fillRect(x - 160, 0, 160, H);
     ctx.fillStyle = C.acc; ctx.fillRect(x - 1, 0, 2, H); }
 }
-const SEC = [[CUT.problemA, '01', 'THE PROBLEM'], [CUT.limits, '02', 'CURRENT SOLUTIONS'], [CUT.physics, '03', 'HOW IT WORKS'], [CUT.device, '04', 'THE DEVICE'], [CUT.safety, '05', 'FAIL-SAFE'], [CUT.stat, '06', 'RESULTS'], [CUT.outlook, '07', 'NEXT STEP']];
+const SEC = [[CUT.problemA, '01', 'THE PROBLEM'], [CUT.limits, '02', 'CURRENT SOLUTIONS'], [CUT.physics, '03', 'HOW IT WORKS'], [CUT.device, '04', 'THE DEVICE'], [CUT.safety, '05', 'FAIL-SAFE'], [CUT.stat, '06', 'RESULTS'], [CUT.outlook, '07', 'HUB MOTOR']];
 function hud(ctx, t) {
   const a = tw(t, 0.4, 1.6) * (1 - tw(t, s(76), s(76.8))); if (a <= 0) return;
   ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = C.mute; ctx.lineWidth = 1.2;
