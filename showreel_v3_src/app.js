@@ -1,4 +1,4 @@
-import { SYNC, B, CUT } from './music.js';
+import { SYNC, B, CUT, BEAT, clock } from './music.js';
 import { loadDevice, setPose, render, project, partCenter, D3 } from './device3d.js';
 
 export const W = 1920, H = 1080, FPS = 60, DUR = 60;
@@ -530,7 +530,6 @@ function sDynamic(ctx, t) {                      // beats 64-68
   txt(ctx, '動態平均捕捉效率', 640, 370, fS(700, 32), C.ink2, 'left', tw(t, vv(35.2), vv(35.7)));
   txt(ctx, '≈', 640, 560, fM(500, 100), C.acc, 'left', tw(t, vv(35), vv(35.4)));
   counter(ctx, 27.6 * tw(t, vv(35), vv(36.3), E.outExpo), 0, 710, 560, 210, C.acc, '%', C.ink);
-  txt(ctx, '開放環境 · 未加導流罩', 644, 626, fS(700, 26), C.mute, 'left', tw(t, vv(35.8), vv(36.3)));
   const x0 = 1180, y0 = 780, cw = 600, ch = 380, X = c => x0 + c / 80 * cw, Yv = h => y0 - h / 16 * ch;
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; poly(ctx, [[x0, y0 - ch], [x0, y0], [x0 + cw, y0]], tw(t, vv(35.2), vv(36), E.ioC));
   ctx.strokeStyle = C.mute; for (let c = 0; c <= 80; c += 10) seg(ctx, X(c), y0, X(c), y0 + (c % 20 ? 6 : 12), tw(t, vv(35.4), vv(36))); ctx.restore();
@@ -590,17 +589,18 @@ function sEnd(ctx, t) {
 const CUTS = Object.values(CUT).map(b => B(b));
 const HW = 0.3;
 const wipeX = (t, tc) => W * E.ioC(P(t, tc - HW, tc + HW));
-// scenes from the device on were authored on the old beat grid (device at 36); they now run one bar later
-const late = f => (ctx, t) => f(ctx, t - B(4));
+// run a scene on its own authored clock (see CLOCK in music.js)
+const on = (name, f) => (ctx, t) => f(ctx, B(clock(name, t / BEAT)));
 // the system shot zooms into the assembled device; hold that drawing while the exploded one draws in
 function sDeviceIn(ctx, t) {
-  const a = 1 - tw(t, B(40.3), B(41.6), E.ioC);
+  const a = 1 - tw(t, B(36.3), B(37.6), E.ioC);
   if (a > 0) { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP: 1, az: 58, el: 24, dist: 900, offX: 380, lookY: -40 });
     ctx.save(); ctx.globalAlpha = a; ctx.drawImage(render('wire'), 0, 0); ctx.restore(); }
-  late(sDevice)(ctx, t);
+  sDevice(ctx, t);
 }
-const SCENES = [[0, CUT.problemA, sIntro], [CUT.problemA, CUT.problemB, sProblemA], [CUT.problemB, CUT.ppd, sProblemB], [CUT.ppd, CUT.limits, sPPD], [CUT.limits, CUT.physics, sLimits], [CUT.physics, CUT.rig, sPhysics],
-  [CUT.rig, CUT.device, sRig], [CUT.device, CUT.safety, sDeviceIn], [CUT.safety, CUT.stat, late(sSafety)], [CUT.stat, CUT.dyn, late(sStatic)], [CUT.dyn, CUT.spec, late(sDynamic)], [CUT.spec, CUT.end, late(sSpec)], [CUT.end, 80.4, sEnd]].map(([a, b, f]) => [B(a), B(b), f]);
+const SCENES = [[0, CUT.problemA, on('intro', sIntro)], [CUT.problemA, CUT.problemB, on('problemA', sProblemA)], [CUT.problemB, CUT.ppd, on('problemB', sProblemB)], [CUT.ppd, CUT.limits, on('ppd', sPPD)],
+  [CUT.limits, CUT.physics, on('limits', sLimits)], [CUT.physics, CUT.rig, on('physics', sPhysics)], [CUT.rig, CUT.device, on('rig', sRig)], [CUT.device, CUT.safety, on('device', sDeviceIn)],
+  [CUT.safety, CUT.stat, on('safety', sSafety)], [CUT.stat, CUT.dyn, on('stat', sStatic)], [CUT.dyn, CUT.spec, on('dyn', sDynamic)], [CUT.spec, CUT.end, on('spec', sSpec)], [CUT.end, 80.4, on('end', sEnd)]].map(([a, b, f]) => [B(a), B(b), f]);
 function scanLine(ctx, t) {
   for (const tc of CUTS) { if (t < tc - HW || t > tc + HW) continue; const x = wipeX(t, tc);
     const g = ctx.createLinearGradient(x - 160, 0, x, 0); g.addColorStop(0, 'rgba(255,138,0,0)'); g.addColorStop(1, 'rgba(255,138,0,0.12)'); ctx.fillStyle = g; ctx.fillRect(x - 160, 0, 160, H);
