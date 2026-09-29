@@ -329,8 +329,11 @@ function sRig(ctx, t) {
   const K = 0.3, z = lerp(1, 1 / K, zp), ks = K * z;   // zoom, and on-screen scale of the device (1 = next scene's framing)
   const pose = (az, el, lookY, dist, drawP) => { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP, az, el, dist, offX: 380, lookY }); D3.camera.updateMatrixWorld(); };
   pose(58, 24, -40, 900, 1); const fbF = project([0, 0, 0]);
-  pose(90, 6, 0, 900 / K, 1); const top0 = (project([0, 0, 0])[1] - project([0, D3.hSize[1] / 2, 0])[1]);   // centre-to-top, side view
-  const mx = lerp(cx, BE[0], BA), my = lerp(cy, BE[1], BA), dcx = mx, dcy = my - bw / 2 + 4 + top0;   // housing top is clamped between the near and far braces; the rest hangs clear of the board
+  pose(90, 6, 0, 900 / K, 1); const c0 = project([0, 0, 0]), top0 = c0[1] - project([0, D3.hSize[1] / 2, 0])[1];   // centre-to-top, side view
+  const hw0 = Math.max(...[-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => Math.abs(project([x * D3.hSize[0] / 2, y * D3.hSize[1] / 2, zz * D3.hSize[2] / 2])[0] - c0[0])))));
+  const mx = lerp(cx, BE[0], BA), my = lerp(cy, BE[1], BA), dcx = mx, dcy = my - bw / 2 + 4 + top0;
+  const bl = Math.hypot(mx - cx, my - cy), BT = [mx + (mx - cx) / bl * 22, my + (my - cy) / bl * 22];   // brace stops just past the clamp bolts
+  const OV = 90, X0 = cx - R - OV, X1 = mx + hw0 + OV;   // board overhangs the wheel and the device equally   // housing top is clamped between the near and far braces; the rest hangs clear of the board
   pose(lerp(90, 58, zp), lerp(6, 24, zp), lerp(0, -40, zp), 900 / ks, tw(t, s(36.6), s(37.9), E.ioC));
   const fb = project([0, 0, 0]), img = render('wire');
   const hs = D3.hSize, cs = [-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => project([x * hs[0] / 2, y * hs[1] / 2, zz * hs[2] / 2]))));
@@ -342,8 +345,8 @@ function sRig(ctx, t) {
   ctx.globalAlpha = wa;
   // board + sandpaper
   const bp = tw(t, s(36), s(36.8), E.ioC);
-  ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; poly(ctx, rectPts(980, gyB, 900, 30), bp, true);
-  ctx.strokeStyle = C.line; ctx.lineWidth = 1; for (const k of [0, 1]) seg(ctx, 1000 + k * 60, gyB + 11 + k * 9, 1860 - k * 90, gyB + 11 + k * 9, bp);
+  ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; poly(ctx, rectPts(X0, gyB, X1 - X0, 30), bp, true);
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1; for (const k of [0, 1]) seg(ctx, X0 + 20 + k * 60, gyB + 11 + k * 9, X1 - 20 - k * 90, gyB + 11 + k * 9, bp);
   ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; poly(ctx, rectPts(cx - 200, gy, 400, 8), bp, true); hatch(ctx, cx - 200, gy, 400, 8, 5, rgba(C.ink, 0.45), bp); ctx.restore();
   // wheel turns so the bottom of the tyre runs toward the device
   tireLine(ctx, cx, cy, R, -t * 8, t, s(36) - 0.3, 0.7);
@@ -351,7 +354,7 @@ function sRig(ctx, t) {
   // stand: upright clamps the axle; the brace off the axle bolt carries the device (the far brace hides behind it)
   angleBar(ctx, [cx - 6, gyB], [cx - 6, cy], 26, tw(t, s(36.3), s(37), E.ioC));
   ctx.globalAlpha = 1; ctx.drawImage(img, dcx - fb[0] / z, dcy - fb[1] / z, W / z, H / z); ctx.globalAlpha = wa;
-  angleBar(ctx, [cx, cy], BE, bw, tw(t, s(36.5), s(37.3), E.ioC));
+  angleBar(ctx, [cx, cy], BT, bw, tw(t, s(36.5), s(37.3), E.ioC));
   { const bp = tw(t, s(37.5), s(37.9), E.ioC); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2)));
     for (const k of [-1, 1]) { arc(ctx, mx + k * 11, my, 4.5, 0, TAU, bp); } ctx.restore(); }   // bolts through brace, housing top, far brace
   // dust flung off the contact patch into the device
