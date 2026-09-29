@@ -313,23 +313,30 @@ function sPhysics(ctx, t) {
 
 // ================================================================ 4 system — hub motor rig + capture device (beats 36-40)
 // slotted angle steel, drawn in front of the wheel like the real stand
-function angleBar(ctx, a, b, w, p) {
+function angleBar(ctx, a, b, w, p, solid = Infinity) {
   if (p <= 0) return; const L = Math.hypot(b[0] - a[0], b[1] - a[1]) * clamp(p);
   ctx.save(); ctx.translate(a[0], a[1]); ctx.rotate(Math.atan2(b[1] - a[1], b[0] - a[0]));
-  ctx.fillStyle = C.bg; ctx.fillRect(0, -w / 2, L, w); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; ctx.strokeRect(0, -w / 2, L, w);
+  ctx.fillStyle = C.bg; ctx.fillRect(0, -w / 2, Math.min(L, solid), w); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; ctx.strokeRect(0, -w / 2, L, w);
   ctx.strokeStyle = C.mute; ctx.lineWidth = 1.2;
   for (let x = 30; x < L - 12; x += 36) { ctx.beginPath(); ctx.arc(x - 3, 0, 4, PI / 2, PI * 1.5); ctx.lineTo(x + 5, -2); ctx.arc(x + 5, 0, 2, -PI / 2, PI / 2); ctx.closePath(); ctx.stroke(); }
   ctx.restore();
 }
 function sRig(ctx, t) {
-  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8, dx = 1705;
+  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8, dcx = 1610, dcy = 590;
   const zp = tw(t, s(38.9), s(39.9), E.ioC), fade = 1 - tw(t, s(38.8), s(39.4));
-  // capture device: the same CAD line drawing the next scene opens on
+  // capture device, side-on between the two braces; the zoom swings the camera round to the next scene's framing
   const K = 0.3, z = lerp(1, 1 / K, zp), ks = K * z;   // zoom, and on-screen scale of the device (1 = next scene's framing)
-  setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP: tw(t, s(36.6), s(37.9), E.ioC), az: 58, el: 24, dist: 900 / ks, offX: 380, lookY: -40 });
-  const fb = project([0, -D3.hSize[1] / 2, 0]), img = render('wire');
-  const ax = lerp(dx, fb[0], zp), ay = lerp(gyB, fb[1], zp);
-  ctx.save(); ctx.translate(ax, ay); ctx.scale(z, z); ctx.translate(-dx, -gyB);
+  const pose = (az, el, lookY, dist, drawP) => { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP, az, el, dist, offX: 380, lookY }); D3.camera.updateMatrixWorld(); };
+  pose(58, 24, -40, 900, 1); const fbF = project([0, 0, 0]);
+  pose(lerp(90, 58, zp), lerp(6, 24, zp), lerp(0, -40, zp), 900 / ks, tw(t, s(36.6), s(37.9), E.ioC));
+  const fb = project([0, 0, 0]), img = render('wire');
+  const hs = D3.hSize, cs = [-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => project([x * hs[0] / 2, y * hs[1] / 2, zz * hs[2] / 2]))));
+  const toRig = ([x, y]) => [dcx + (x - fb[0]) / z, dcy + (y - fb[1]) / z];
+  const [bx0, by0] = toRig([Math.min(...cs.map(c => c[0])), Math.min(...cs.map(c => c[1]))]), [bx1, by1] = toRig([Math.max(...cs.map(c => c[0])), Math.max(...cs.map(c => c[1]))]);
+  const ax = lerp(dcx, fbF[0], zp), ay = lerp(dcy, fbF[1], zp);
+  ctx.save(); ctx.translate(ax, ay); ctx.scale(z, z); ctx.translate(-dcx, -dcy);
+  const wa = 1 - tw(zp, 0.55, 0.95);   // the rig fades as the camera closes in on the device
+  ctx.globalAlpha = wa;
   // board + sandpaper
   const bp = tw(t, s(36), s(36.8), E.ioC);
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; poly(ctx, rectPts(980, gyB, 900, 30), bp, true);
@@ -338,13 +345,15 @@ function sRig(ctx, t) {
   // wheel turns so the bottom of the tyre runs toward the device
   tireLine(ctx, cx, cy, R, -t * 8, t, s(36) - 0.3, 0.7);
   ctx.save(); ctx.lineCap = 'round'; for (let k = 0; k < 2; k++) { const p = tw(t, s(37) + k * 0.1, s(37.6) + k * 0.1); if (p <= 0) continue; ctx.strokeStyle = k === 0 ? C.acc : rgba(C.acc, 0.5); ctx.lineWidth = 3 - k; const a0 = -t * (4 + k * 2) + PI * 0.9 + k; arc(ctx, cx, cy, R + 24 + k * 18, a0, a0 - PI * (0.55 + k * 0.2) * p, 1); } ctx.restore();
-  // stand: upright + diagonal brace clamp the axle
+  // stand: upright clamps the axle; the brace off the axle bolt carries the device (the far brace hides behind it)
   angleBar(ctx, [cx - 6, gyB], [cx - 6, cy], 26, tw(t, s(36.3), s(37), E.ioC));
-  angleBar(ctx, [cx, cy], [1610, gyB - 4], 24, tw(t, s(36.5), s(37.3), E.ioC));
-  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2))); ctx.restore();
+  ctx.globalAlpha = 1; ctx.drawImage(img, dcx - fb[0] / z, dcy - fb[1] / z, W / z, H / z); ctx.globalAlpha = wa;
+  { const d = Math.hypot(dcx - cx, dcy - cy), ux = (dcx - cx) / d, uy = (dcy - cy) / d, e = [dcx + ux * 60, dcy + uy * 60];
+    angleBar(ctx, [cx, cy], e, 24, tw(t, s(36.5), s(37.3), E.ioC), (bx0 - cx) / ux - 14);
+    ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2))); arc(ctx, dcx, dcy, 7, 0, TAU, tw(t, s(37.6), s(38))); ctx.restore(); }
   // dust flung off the contact patch into the device
   for (let i = 0; i < 150; i++) { const ts = s(37.3) + i * 0.013; if (ts > t) break; const a = t - ts, life = 0.7 + hash(i * 2.7) * 0.3, u = a / life; if (u >= 1) continue;
-    const x0 = cx + 40, y0 = gy - 4, x1 = dx - 70 + hash(i * 1.9) * 40, y1 = gyB - 20 - hash(i * 4.3) * 110, e = E.outC(u);
+    const x0 = cx + 40, y0 = gy - 4, x1 = bx0 + 4 + hash(i * 1.9) * 22, y1 = lerp(by0 + 18, by1 - 18, hash(i * 4.3)), e = E.outC(u);
     const x = lerp(x0, x1, e), y = lerp(y0, y1, e) - Math.sin(PI * e) * (20 + hash(i * 6.1) * 60);
     ctx.fillStyle = rgba(C.acc, 0.9 * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 1.4 + hash(i * 3.1) * 1.6, 0, TAU); ctx.fill(); }
   // call-outs
@@ -352,9 +361,8 @@ function sRig(ctx, t) {
     const hl = tw(t, s(37.2), s(37.8)) * a; ctx.save(); ctx.globalAlpha = hl; ctx.strokeStyle = C.acc; ctx.lineWidth = 1.2; poly(ctx, [[cx + 40, cy - 40], [1580, 318], [1620, 318]], 1); ctx.restore();
     txt(ctx, '48 V 輪轂馬達', 1630, 327, fS(900, 26), C.acc, 'left', hl);
     txt(ctx, '砂紙', cx - 214, gy + 6, fS(700, 22), C.mute, 'right', tw(t, s(37.3), s(37.8)) * a);
-    txt(ctx, '捕捉裝置', dx, gyB - 190, fS(900, 28), C.ink, 'center', tw(t, s(37.6), s(38.2)) * a); }
+    txt(ctx, '捕捉裝置', (bx0 + bx1) / 2, by0 - 24, fS(900, 28), C.ink, 'center', tw(t, s(37.6), s(38.2)) * a); }
   ctx.restore();
-  ctx.drawImage(img, ax - fb[0], ay - fb[1]);
   // left column
   if (fade > 0) {
     { const p = tw(t, s(36), s(36) + 0.5); ctx.save(); ctx.globalAlpha = fade; ctx.fillStyle = C.acc; ctx.fillRect(140, 155, 14 * p, 14); ctx.restore();
