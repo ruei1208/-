@@ -311,6 +311,66 @@ function sPhysics(ctx, t) {
   reveal(ctx, '與極板間距成反比', ex, 876, { t, t0: s(33.9), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
 }
 
+// ================================================================ 4 system — hub motor rig + capture device (beats 36-40)
+// slotted angle steel, drawn in front of the wheel like the real stand
+function angleBar(ctx, a, b, w, p) {
+  if (p <= 0) return; const L = Math.hypot(b[0] - a[0], b[1] - a[1]) * clamp(p);
+  ctx.save(); ctx.translate(a[0], a[1]); ctx.rotate(Math.atan2(b[1] - a[1], b[0] - a[0]));
+  ctx.fillStyle = C.bg; ctx.fillRect(0, -w / 2, L, w); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; ctx.strokeRect(0, -w / 2, L, w);
+  ctx.strokeStyle = C.mute; ctx.lineWidth = 1.2;
+  for (let x = 30; x < L - 12; x += 36) { ctx.beginPath(); ctx.arc(x - 3, 0, 4, PI / 2, PI * 1.5); ctx.lineTo(x + 5, -2); ctx.arc(x + 5, 0, 2, -PI / 2, PI / 2); ctx.closePath(); ctx.stroke(); }
+  ctx.restore();
+}
+function sRig(ctx, t) {
+  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8, dx = 1705;
+  const zp = tw(t, s(38.9), s(39.9), E.ioC), fade = 1 - tw(t, s(38.8), s(39.4));
+  // capture device: the same CAD line drawing the next scene opens on
+  const K = 0.3, z = lerp(1, 1 / K, zp), ks = K * z;   // zoom, and on-screen scale of the device (1 = next scene's framing)
+  setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP: tw(t, s(36.6), s(37.9), E.ioC), az: 58, el: 24, dist: 900 / ks, offX: 380, lookY: -40 });
+  const fb = project([0, -D3.hSize[1] / 2, 0]), img = render('wire');
+  const ax = lerp(dx, fb[0], zp), ay = lerp(gyB, fb[1], zp);
+  ctx.save(); ctx.translate(ax, ay); ctx.scale(z, z); ctx.translate(-dx, -gyB);
+  // board + sandpaper
+  const bp = tw(t, s(36), s(36.8), E.ioC);
+  ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.8; poly(ctx, rectPts(980, gyB, 900, 30), bp, true);
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1; for (const k of [0, 1]) seg(ctx, 1000 + k * 60, gyB + 11 + k * 9, 1860 - k * 90, gyB + 11 + k * 9, bp);
+  ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; poly(ctx, rectPts(cx - 200, gy, 400, 8), bp, true); hatch(ctx, cx - 200, gy, 400, 8, 5, rgba(C.ink, 0.45), bp); ctx.restore();
+  // wheel turns so the bottom of the tyre runs toward the device
+  tireLine(ctx, cx, cy, R, -t * 8, t, s(36) - 0.3, 0.7);
+  ctx.save(); ctx.lineCap = 'round'; for (let k = 0; k < 2; k++) { const p = tw(t, s(37) + k * 0.1, s(37.6) + k * 0.1); if (p <= 0) continue; ctx.strokeStyle = k === 0 ? C.acc : rgba(C.acc, 0.5); ctx.lineWidth = 3 - k; const a0 = -t * (4 + k * 2) + PI * 0.9 + k; arc(ctx, cx, cy, R + 24 + k * 18, a0, a0 - PI * (0.55 + k * 0.2) * p, 1); } ctx.restore();
+  // stand: upright + diagonal brace clamp the axle
+  angleBar(ctx, [cx - 6, gyB], [cx - 6, cy], 26, tw(t, s(36.3), s(37), E.ioC));
+  angleBar(ctx, [cx, cy], [1610, gyB - 4], 24, tw(t, s(36.5), s(37.3), E.ioC));
+  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2))); ctx.restore();
+  // dust flung off the contact patch into the device
+  for (let i = 0; i < 150; i++) { const ts = s(37.3) + i * 0.013; if (ts > t) break; const a = t - ts, life = 0.7 + hash(i * 2.7) * 0.3, u = a / life; if (u >= 1) continue;
+    const x0 = cx + 40, y0 = gy - 4, x1 = dx - 70 + hash(i * 1.9) * 40, y1 = gyB - 20 - hash(i * 4.3) * 110, e = E.outC(u);
+    const x = lerp(x0, x1, e), y = lerp(y0, y1, e) - Math.sin(PI * e) * (20 + hash(i * 6.1) * 60);
+    ctx.fillStyle = rgba(C.acc, 0.9 * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 1.4 + hash(i * 3.1) * 1.6, 0, TAU); ctx.fill(); }
+  // call-outs
+  { const a = fade; dim(ctx, cx - R, cy - R - 44, cx + R, cy - R - 44, 'Ø 50 cm', tw(t, s(37.2), s(38), E.lin) * a, C.mute, 0, fM(500, 20));
+    const hl = tw(t, s(37.2), s(37.8)) * a; ctx.save(); ctx.globalAlpha = hl; ctx.strokeStyle = C.acc; ctx.lineWidth = 1.2; poly(ctx, [[cx + 40, cy - 40], [1580, 318], [1620, 318]], 1); ctx.restore();
+    txt(ctx, '48 V 輪轂馬達', 1630, 327, fS(900, 26), C.acc, 'left', hl);
+    txt(ctx, '砂紙', cx - 214, gy + 6, fS(700, 22), C.mute, 'right', tw(t, s(37.3), s(37.8)) * a);
+    txt(ctx, '捕捉裝置', dx, gyB - 190, fS(900, 28), C.ink, 'center', tw(t, s(37.6), s(38.2)) * a); }
+  ctx.restore();
+  ctx.drawImage(img, ax - fb[0], ay - fb[1]);
+  // left column
+  if (fade > 0) {
+    { const p = tw(t, s(36), s(36) + 0.5); ctx.save(); ctx.globalAlpha = fade; ctx.fillStyle = C.acc; ctx.fillRect(140, 155, 14 * p, 14); ctx.restore();
+      reveal(ctx, '04 — THE SYSTEM', 168, 170, { t, t0: s(36) + 0.06, font: fM(500, 20), size: 20, color: C.acc, ls: 3, stagger: 0.014, alpha: fade }); }
+    reveal(ctx, '整體模組', 140, 290, { t, t0: s(36.1), font: fS(700, 36), size: 36, color: C.mute, stagger: 0.04, alpha: fade });
+    reveal(ctx, '輪轂馬達 × 捕捉裝置', 140, 400, { t, t0: s(36.3), font: fS(900, 68), size: 68, color: C.acc, stagger: 0.04, dur: 0.9, alpha: fade });
+    reveal(ctx, '輪胎摩擦砂紙揚起粉塵，', 140, 490, { t, t0: s(36.9), font: fS(700, 32), size: 32, color: C.ink2, stagger: 0.02, alpha: fade });
+    reveal(ctx, '裝置鎖在馬達後方，就地攔截。', 140, 540, { t, t0: s(37.3), font: fS(700, 32), size: 32, color: C.ink2, stagger: 0.02, alpha: fade });
+    [['48 V', '輪轂馬達'], ['350', 'RPM 最高轉速'], ['Ø 50', 'cm 輪胎外徑'], ['≈ 33', 'km/h 等效車速']].forEach(([v, l], i) => {
+      const x = 140 + i * 215, t0 = s(37.1) + i * 0.1;
+      ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = i === 1 ? C.acc : C.line; ctx.lineWidth = 1.5; seg(ctx, x, 640, x + 185, 640, tw(t, t0, t0 + 0.5, E.ioC)); ctx.restore();
+      reveal(ctx, v, x, 708, { t, t0: t0 + 0.05, font: fM(600, 46), size: 46, color: i === 1 ? C.acc : C.ink, stagger: 0.03, alpha: fade });
+      txt(ctx, l, x, 750, fS(700, 22), C.mute, 'left', tw(t, t0 + 0.2, t0 + 0.6) * fade); });
+  }
+}
+
 // ================================================================ 4 device — real CAD model (beats 36-52)
 function sDevice(ctx, t) {
   const land = [38.5, 39, 39.5, 40].map(b => s(b));
@@ -494,45 +554,6 @@ function sSpec(ctx, t) {                         // beats 68-72
   reveal(ctx, '初步跡象，仍待 6PPD 標準品比對', rx, 812, { t, t0: vv(40.25), font: fS(700, 24), size: 24, color: C.mute, stagger: 0.02 });
 }
 
-// ================================================================ 7 hub motor module (beats 72-76)
-function sHubMotor(ctx, t) {
-  kicker(ctx, 140, 170, '07 — HUB MOTOR MODULE', t, s(72));
-  reveal(ctx, '電動腳踏車驅動輪 · 架設於專用支架', 140, 300, { t, t0: s(72.1), font: fS(700, 36), size: 36, color: C.mute, stagger: 0.02 });
-  reveal(ctx, '我們的輪轂馬達模組', 140, 430, { t, t0: s(72.4), font: fS(900, 72), size: 72, color: C.acc, stagger: 0.05, dur: 1 });
-  reveal(ctx, '輪胎摩擦砂紙產生粉塵，', 140, 510, { t, t0: s(73.1), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
-  reveal(ctx, '捕捉裝置鎖固於馬達後方。', 140, 562, { t, t0: s(73.6), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
-  // spec chips
-  [['48 V', '輪轂馬達'], ['350', 'RPM 最高轉速'], ['Ø 50', 'cm 輪胎外徑'], ['≈ 33', 'km/h 等效車速']].forEach(([v, l], i) => {
-    const x = 140 + i * 220, t0 = s(73.4) + i * 0.1, p = tw(t, t0, t0 + 0.5, E.ioC);
-    ctx.save(); ctx.strokeStyle = i === 1 ? C.acc : C.line; ctx.lineWidth = 1.5; seg(ctx, x, 660, x + 190, 660, p); ctx.restore();
-    reveal(ctx, v, x, 730, { t, t0: t0 + 0.05, font: fM(600, 48), size: 48, color: i === 1 ? C.acc : C.ink, stagger: 0.03 });
-    txt(ctx, l, x, 772, fS(700, 22), C.mute, 'left', tw(t, t0 + 0.2, t0 + 0.6)); });
-  // rig drawing: stand, wheel, sandpaper, capture device behind the motor
-  const cx = 1500, cy = 500, R = 200, gy = cy + R, base = 900;
-  const sp = tw(t, s(72), s(72.9), E.ioC);
-  ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = C.mute; ctx.lineWidth = 2;
-  seg(ctx, 1290, base, 1710, base, sp); poly(ctx, [[1330, base], [cx, cy], [1670, base]], sp);
-  ctx.strokeStyle = C.ink2; poly(ctx, rectPts(1360, gy, 280, 22), sp, true); hatch(ctx, 1360, gy, 280, 22, 8, rgba(C.ink, 0.35), sp);
-  ctx.strokeStyle = C.dim; ctx.lineWidth = 1.5; poly(ctx, rectPts(1380, gy + 22, 240, base - gy - 22), sp, true); ctx.restore();
-  txt(ctx, '砂紙', 1650, gy + 18, fS(700, 22), C.mute, 'left', tw(t, s(72.6), s(73.1)));
-  tireLine(ctx, cx, cy, R, t * 8, t, s(72) - 0.3, 0.8);
-  ctx.save(); ctx.lineCap = 'round'; for (let k = 0; k < 2; k++) { const p = tw(t, s(73) + k * 0.1, s(73.5) + k * 0.1); if (p <= 0) continue; ctx.strokeStyle = k === 0 ? C.acc : rgba(C.acc, 0.5); ctx.lineWidth = 3 - k; const a0 = t * (4 + k * 2) + k; arc(ctx, cx, cy, R + 24 + k * 18, a0, a0 + PI * (0.6 + k * 0.2) * p, 1); } ctx.restore();
-  dim(ctx, cx - R, cy - R - 60, cx + R, cy - R - 60, 'Ø 50 cm', tw(t, s(72.8), s(73.6), E.lin), C.mute, 0, fM(500, 22));
-  { const hl = tw(t, s(73.2), s(73.8)); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 1.2; poly(ctx, [[cx + 50, cy - 50], [cx + 150, cy - 170], [cx + 200, cy - 170]], hl); ctx.restore();
-    txt(ctx, 'HUB MOTOR · 48 V', cx + 208, cy - 164, fM(500, 20), C.acc, 'left', hl, 2); }
-  // capture device, mounted behind the motor
-  const bx = 1150, by = 610, bw = 130, bh = 110, dp = tw(t, s(72.8), s(73.5), E.ioC);
-  ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; poly(ctx, rectPts(bx, by, bw, bh), dp, true);
-  ctx.strokeStyle = C.acc; ctx.lineWidth = 3; for (let k = 0; k < 4; k++) seg(ctx, bx + 26 + k * 26, by + 16, bx + 26 + k * 26, by + bh - 16, tw(t, s(73) + k * 0.06, s(73.4) + k * 0.06, E.ioC));
-  ctx.strokeStyle = C.mute; ctx.lineWidth = 1.5; poly(ctx, [[bx + bw, by + bh / 2], [cx - R * 0.72, cy + 20]], dp); ctx.restore();
-  txt(ctx, '捕捉裝置', bx + bw / 2, by - 22, fS(900, 28), C.ink, 'center', tw(t, s(73.3), s(73.9)));
-  // dust flung off the contact patch into the plates
-  for (let i = 0; i < 110; i++) { const ts = s(73.2) + i * 0.02; if (ts > t) break; const a = t - ts, life = 0.8 + hash(i * 2.7) * 0.3, u = a / life; if (u >= 1) continue;
-    const x0 = cx - 30, y0 = gy - 6, x1 = bx + 20 + hash(i * 1.9) * (bw - 40), y1 = by + 20 + hash(i * 4.3) * (bh - 40), e = E.outC(u);
-    const x = lerp(x0, x1, e), y = lerp(y0, y1, e) - Math.sin(PI * e) * (40 + hash(i * 6.1) * 90);
-    ctx.fillStyle = rgba(C.acc, 0.9 * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 1.6 + hash(i * 3.1) * 1.8, 0, TAU); ctx.fill(); }
-}
-
 // ================================================================ end card (beats 76-80)
 function sEnd(ctx, t) {
   const cx = W / 2, cy = 350, t0 = s(76);
@@ -555,14 +576,23 @@ function sEnd(ctx, t) {
 const CUTS = Object.values(CUT).map(b => B(b));
 const HW = 0.3;
 const wipeX = (t, tc) => W * E.ioC(P(t, tc - HW, tc + HW));
-const SCENES = [[0, CUT.problemA, sIntro], [CUT.problemA, CUT.problemB, sProblemA], [CUT.problemB, CUT.ppd, sProblemB], [CUT.ppd, CUT.limits, sPPD], [CUT.limits, CUT.physics, sLimits], [CUT.physics, CUT.device, sPhysics],
-  [CUT.device, CUT.safety, sDevice], [CUT.safety, CUT.stat, sSafety], [CUT.stat, CUT.dyn, sStatic], [CUT.dyn, CUT.spec, sDynamic], [CUT.spec, CUT.outlook, sSpec], [CUT.outlook, CUT.end, sHubMotor], [CUT.end, 80.4, sEnd]].map(([a, b, f]) => [B(a), B(b), f]);
+// scenes from the device on were authored on the old beat grid (device at 36); they now run one bar later
+const late = f => (ctx, t) => f(ctx, t - B(4));
+// the system shot zooms into the assembled device; hold that drawing while the exploded one draws in
+function sDeviceIn(ctx, t) {
+  const a = 1 - tw(t, B(40.3), B(41.6), E.ioC);
+  if (a > 0) { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP: 1, az: 58, el: 24, dist: 900, offX: 380, lookY: -40 });
+    ctx.save(); ctx.globalAlpha = a; ctx.drawImage(render('wire'), 0, 0); ctx.restore(); }
+  late(sDevice)(ctx, t);
+}
+const SCENES = [[0, CUT.problemA, sIntro], [CUT.problemA, CUT.problemB, sProblemA], [CUT.problemB, CUT.ppd, sProblemB], [CUT.ppd, CUT.limits, sPPD], [CUT.limits, CUT.physics, sLimits], [CUT.physics, CUT.rig, sPhysics],
+  [CUT.rig, CUT.device, sRig], [CUT.device, CUT.safety, sDeviceIn], [CUT.safety, CUT.stat, late(sSafety)], [CUT.stat, CUT.dyn, late(sStatic)], [CUT.dyn, CUT.spec, late(sDynamic)], [CUT.spec, CUT.end, late(sSpec)], [CUT.end, 80.4, sEnd]].map(([a, b, f]) => [B(a), B(b), f]);
 function scanLine(ctx, t) {
   for (const tc of CUTS) { if (t < tc - HW || t > tc + HW) continue; const x = wipeX(t, tc);
     const g = ctx.createLinearGradient(x - 160, 0, x, 0); g.addColorStop(0, 'rgba(255,138,0,0)'); g.addColorStop(1, 'rgba(255,138,0,0.12)'); ctx.fillStyle = g; ctx.fillRect(x - 160, 0, 160, H);
     ctx.fillStyle = C.acc; ctx.fillRect(x - 1, 0, 2, H); }
 }
-const SEC = [[CUT.problemA, '01', 'THE PROBLEM'], [CUT.limits, '02', 'CURRENT SOLUTIONS'], [CUT.physics, '03', 'HOW IT WORKS'], [CUT.device, '04', 'THE DEVICE'], [CUT.safety, '05', 'FAIL-SAFE'], [CUT.stat, '06', 'RESULTS'], [CUT.outlook, '07', 'HUB MOTOR']];
+const SEC = [[CUT.problemA, '01', 'THE PROBLEM'], [CUT.limits, '02', 'CURRENT SOLUTIONS'], [CUT.physics, '03', 'HOW IT WORKS'], [CUT.rig, '04', 'THE SYSTEM'], [CUT.device, '04', 'THE DEVICE'], [CUT.safety, '05', 'FAIL-SAFE'], [CUT.stat, '06', 'RESULTS']];
 function hud(ctx, t) {
   const a = tw(t, 0.4, 1.6) * (1 - tw(t, s(76), s(76.8))); if (a <= 0) return;
   ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = C.mute; ctx.lineWidth = 1.2;
@@ -571,7 +601,7 @@ function hud(ctx, t) {
   for (const k of [-1, 0, 1]) { if (k === 0) { ctx.fillStyle = C.acc; ctx.fillRect(154, 55, 4, 18); } else ctx.strokeRect(154.5 + k * 8, 55.5, 3, 17); }
   txt(ctx, 'TRWP', 186, 73, fM(600, 22), C.ink, 'left', 1, 3);
   const sec = [...SEC].reverse().find(q => t >= B(q[0])); if (sec) { const sp = tw(t, B(sec[0]), B(sec[0]) + 0.6); ctx.save(); ctx.beginPath(); ctx.rect(1100, 40, 680, 46); ctx.clip();
-    txt(ctx, `${sec[1]} / 07 — ${sec[2]}`, W - 140, 73 + (1 - sp) * 40, fM(500, 20), C.mute, 'right', 1, 3); ctx.restore(); }
+    txt(ctx, `${sec[1]} / 06 — ${sec[2]}`, W - 140, 73 + (1 - sp) * 40, fM(500, 20), C.mute, 'right', 1, 3); ctx.restore(); }
   const rx0 = 140, rx1 = W - 140, ry = H - 64; ctx.strokeStyle = C.dim; ctx.lineWidth = 1; seg(ctx, rx0, ry, rx1, ry, 1);
   for (let b = 0; b <= 80; b++) { const x = rx0 + (rx1 - rx0) * b / 80; ctx.strokeStyle = B(b) <= t ? C.ink2 : C.dim; seg(ctx, x, ry, x, ry - (b % 4 ? 5 : 12), 1); }
   const mx = rx0 + (rx1 - rx0) * t / 60; ctx.fillStyle = C.acc; ctx.beginPath(); ctx.moveTo(mx, ry + 3); ctx.lineTo(mx - 7, ry + 15); ctx.lineTo(mx + 7, ry + 15); ctx.closePath(); ctx.fill();

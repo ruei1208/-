@@ -2,7 +2,7 @@
 export const SR = 48000, DUR = 60, BPM = 80, BEAT = 60 / BPM, BAR = BEAT * 4;
 export const B = n => n * BEAT;
 // section cuts (beats) shared with the picture
-export const CUT = { problemA: 8, problemB: 12, ppd: 15, limits: 18, physics: 26, device: 36, safety: 52, stat: 60, dyn: 64, spec: 68, outlook: 72, end: 76 };
+export const CUT = { problemA: 8, problemB: 12, ppd: 15, limits: 18, physics: 26, rig: 36, device: 40, safety: 56, stat: 64, dyn: 68, spec: 72, end: 76 };
 
 const CH = {
   Fmaj7: { r: 41, v: [53, 57, 60, 64, 67] }, Am7: { r: 45, v: [57, 60, 64, 67, 71] },
@@ -16,10 +16,10 @@ const inR = (b, ...ranges) => ranges.some(([a, z]) => b >= a && b < z);
 function arrangement() {
   const kicks = [], rims = [], ticks = [];
   for (let b = 0; b < 80; b++) {
-    if (inR(b, [8, 52], [60, 72]) && b % 2 === 0) kicks.push(B(b));
-    if (inR(b, [18, 52], [60, 72]) && b % 2 === 1) rims.push(B(b));
+    if (inR(b, [8, 56], [64, 76]) && b % 2 === 0) kicks.push(B(b));
+    if (inR(b, [18, 56], [64, 76]) && b % 2 === 1) rims.push(B(b));
   }
-  for (let e = 0; e < 160; e++) { const b = e / 2; if (inR(b, [8, 52], [60, 76])) ticks.push(B(b)); }
+  for (let e = 0; e < 160; e++) { const b = e / 2; if (inR(b, [8, 56], [64, 76])) ticks.push(B(b)); }
   kicks.push(B(76));
   return { kicks, rims, ticks };
 }
@@ -60,7 +60,7 @@ export async function renderMusic() {
     lp.connect(g); g.connect(p); p.connect(pianoBus);
   }
   const padLP = filt('lowpass', 700, 0.6); const padG = ctx.createGain(); padLP.connect(padG); padG.connect(master); send(padG, rev, 0.6);
-  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(52)); f.exponentialRampToValueAtTime(520, B(55)); f.exponentialRampToValueAtTime(1100, B(60)); f.setValueAtTime(1100, B(76)); f.exponentialRampToValueAtTime(700, 60); }
+  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(56)); f.exponentialRampToValueAtTime(520, B(59)); f.exponentialRampToValueAtTime(1100, B(64)); f.setValueAtTime(1100, B(76)); f.exponentialRampToValueAtTime(700, 60); }
   function pad(t, notes, dur) {
     for (const m of notes) for (const [type, det, pan, a] of [['sawtooth', -7, -0.5, 0.010], ['sawtooth', 7, 0.5, 0.010], ['triangle', 0, 0, 0.022]]) {
       const o = ctx.createOscillator(); o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
@@ -104,27 +104,27 @@ export async function renderMusic() {
   }
   for (let b = 0; b < 76; b++) {
     const c = CH[barChord(Math.floor(b / 4))], k = b % 4;
-    if (inR(b, [0, 8], [72, 76])) { piano(B(b), c.v[[2, 3, 4, 1][k]] + 12, [0.45, 0.6, 0.5, 0.55][k], 2.8, (k - 1.5) * 0.15); continue; }
-    if (inR(b, [53, 60])) { continue; }
+    if (inR(b, [0, 8])) { piano(B(b), c.v[[2, 3, 4, 1][k]] + 12, [0.45, 0.6, 0.5, 0.55][k], 2.8, (k - 1.5) * 0.15); continue; }
+    if (inR(b, [57, 64])) { continue; }
     const seq = [0, 2, 4, 3, 1, 3, 4, 2];
     for (const h of [0, 1]) { const i = k * 2 + h; piano(B(b + h / 2), c.v[seq[i]] + 12, h ? 0.32 : 0.46, 2.0, (seq[i] - 2) * 0.12); }
-    if (inR(b, [60, 72])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
+    if (inR(b, [64, 76])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
   }
   // rain: sparse high drops during the fail-safe section
-  [[53, 4], [53.75, 2], [54.5, 3], [55.25, 1], [55.5, 4], [56.5, 3], [57.25, 2], [58, 4], [58.75, 1], [59.25, 3]].forEach(([b, i], n) => piano(B(b), CH[barChord(Math.floor(b / 4))].v[i] + 24, 0.3 - n * 0.008, 1.9, 0.4 - i * 0.15));
+  [[57, 4], [57.75, 2], [58.5, 3], [59.25, 1], [59.5, 4], [60.5, 3], [61.25, 2], [62, 4], [62.75, 1], [63.25, 3]].forEach(([b, i], n) => piano(B(b), CH[barChord(Math.floor(b / 4))].v[i] + 24, 0.3 - n * 0.008, 1.9, 0.4 - i * 0.15));
   SYNC.kicks.forEach(t => kick(t, t >= B(76) ? 0.8 : 1));
   SYNC.rims.forEach(t => rim(t, 0.8));
   SYNC.ticks.forEach((t, i) => tick(t, i % 2 ? 0.45 : 0.7));
-  for (let e = 0; e < 320; e++) { const b = e / 4; if (inR(b, [26, 52], [60, 72])) shaker(B(b), e % 2 ? 0.6 : 1); }
-  [[0.05, 1.4], [B(18), 0.6], [B(26), 0.8], [B(36), 1.6], [B(52), 0.8], [B(72), 0.8], [B(76), 1.0]].forEach(([t, d]) => pencil(t, d));
+  for (let e = 0; e < 320; e++) { const b = e / 4; if (inR(b, [26, 56], [64, 76])) shaker(B(b), e % 2 ? 0.6 : 1); }
+  [[0.05, 1.4], [B(18), 0.6], [B(26), 0.8], [B(36), 1.2], [B(40), 1.6], [B(56), 0.8], [B(76), 1.0]].forEach(([t, d]) => pencil(t, d));
   Object.values(CUT).forEach(b => airWhoosh(B(b), 0.9));
-  // device: plates land, cartridge + dust box click in, scan shimmer, pull-out
-  [38.5, 39, 39.5, 40].forEach(b => thud(B(b), 0.8));
-  slide(B(40.75), B(41.5)); click(B(41.5), 1); slide(B(41.8), B(42.5)); click(B(42.5), 0.9);
-  swell(B(42.8), B(43.5), 0.7);
-  slide(B(48), B(49)); slide(B(50), B(51)); click(B(51), 0.8);
+  // device (one bar after the system shot): plates land, cartridge + dust box click in, scan shimmer, pull-out
+  [42.5, 43, 43.5, 44].forEach(b => thud(B(b), 0.8));
+  slide(B(44.75), B(45.5)); click(B(45.5), 1); slide(B(45.8), B(46.5)); click(B(46.5), 0.9);
+  swell(B(46.8), B(47.5), 0.7);
+  slide(B(52), B(53)); slide(B(54), B(55)); click(B(55), 0.8);
   // safety: relay opens
-  click(B(56), 1.3); powerDown(B(56) + 0.01); swell(B(58.5), B(60), 1);
+  click(B(60), 1.3); powerDown(B(60) + 0.01); swell(B(62.5), B(64), 1);
   // finale
   [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(B(76) + i * 0.045, m, 0.55, 3.4, (i - 4) * 0.08));
   bell(B(76), 76, 1); bell(B(77), 79, 0.6); bell(B(78), 84, 0.45);
