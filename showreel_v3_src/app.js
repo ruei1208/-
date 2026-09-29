@@ -322,12 +322,15 @@ function angleBar(ctx, a, b, w, p, solid = Infinity) {
   ctx.restore();
 }
 function sRig(ctx, t) {
-  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8, dcx = 1610, dcy = 590;
+  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8;
+  const BE = [1660, 540], BA = 0.82, bw = 24;   // brace end, and where along it the device top is bolted
   const zp = tw(t, s(38.9), s(39.9), E.ioC), fade = 1 - tw(t, s(38.8), s(39.4));
   // capture device, side-on between the two braces; the zoom swings the camera round to the next scene's framing
   const K = 0.3, z = lerp(1, 1 / K, zp), ks = K * z;   // zoom, and on-screen scale of the device (1 = next scene's framing)
   const pose = (az, el, lookY, dist, drawP) => { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP, az, el, dist, offX: 380, lookY }); D3.camera.updateMatrixWorld(); };
   pose(58, 24, -40, 900, 1); const fbF = project([0, 0, 0]);
+  pose(90, 6, 0, 900 / K, 1); const top0 = (project([0, 0, 0])[1] - project([0, D3.hSize[1] / 2, 0])[1]);   // centre-to-top, side view
+  const mx = lerp(cx, BE[0], BA), my = lerp(cy, BE[1], BA), dcx = mx, dcy = my + bw / 2 + top0;   // housing top sits under the brace
   pose(lerp(90, 58, zp), lerp(6, 24, zp), lerp(0, -40, zp), 900 / ks, tw(t, s(36.6), s(37.9), E.ioC));
   const fb = project([0, 0, 0]), img = render('wire');
   const hs = D3.hSize, cs = [-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => project([x * hs[0] / 2, y * hs[1] / 2, zz * hs[2] / 2]))));
@@ -348,9 +351,9 @@ function sRig(ctx, t) {
   // stand: upright clamps the axle; the brace off the axle bolt carries the device (the far brace hides behind it)
   angleBar(ctx, [cx - 6, gyB], [cx - 6, cy], 26, tw(t, s(36.3), s(37), E.ioC));
   ctx.globalAlpha = 1; ctx.drawImage(img, dcx - fb[0] / z, dcy - fb[1] / z, W / z, H / z); ctx.globalAlpha = wa;
-  { const d = Math.hypot(dcx - cx, dcy - cy), ux = (dcx - cx) / d, uy = (dcy - cy) / d, e = [dcx + ux * 60, dcy + uy * 60];
-    angleBar(ctx, [cx, cy], e, 24, tw(t, s(36.5), s(37.3), E.ioC), (bx0 - cx) / ux - 14);
-    ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2))); arc(ctx, dcx, dcy, 7, 0, TAU, tw(t, s(37.6), s(38))); ctx.restore(); }
+  angleBar(ctx, [cx, cy], BE, bw, tw(t, s(36.5), s(37.3), E.ioC));
+  { const bp = tw(t, s(37.5), s(37.9), E.ioC); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; arc(ctx, cx, cy, 12, 0, TAU, tw(t, s(36.8), s(37.2)));
+    for (const k of [-1, 1]) { const x = mx + k * 9; seg(ctx, x, my - 8, x, my + bw / 2 + 12, bp); seg(ctx, x - 5, my - 8, x + 5, my - 8, bp); } ctx.restore(); }   // bolts through the brace into the housing top
   // dust flung off the contact patch into the device
   for (let i = 0; i < 150; i++) { const ts = s(37.3) + i * 0.013; if (ts > t) break; const a = t - ts, life = 0.7 + hash(i * 2.7) * 0.3, u = a / life; if (u >= 1) continue;
     const x0 = cx + 40, y0 = gy - 4, x1 = bx0 + 4 + hash(i * 1.9) * 22, y1 = lerp(by0 + 18, by1 - 18, hash(i * 4.3)), e = E.outC(u);
@@ -361,7 +364,7 @@ function sRig(ctx, t) {
     const hl = tw(t, s(37.2), s(37.8)) * a; ctx.save(); ctx.globalAlpha = hl; ctx.strokeStyle = C.acc; ctx.lineWidth = 1.2; poly(ctx, [[cx + 40, cy - 40], [1580, 318], [1620, 318]], 1); ctx.restore();
     txt(ctx, '48 V 輪轂馬達', 1630, 327, fS(900, 26), C.acc, 'left', hl);
     txt(ctx, '砂紙', cx - 214, gy + 6, fS(700, 22), C.mute, 'right', tw(t, s(37.3), s(37.8)) * a);
-    txt(ctx, '捕捉裝置', (bx0 + bx1) / 2, by0 - 24, fS(900, 28), C.ink, 'center', tw(t, s(37.6), s(38.2)) * a); }
+    txt(ctx, '捕捉裝置', bx1 + 22, (by0 + by1) / 2 + 10, fS(900, 28), C.ink, 'left', tw(t, s(37.6), s(38.2)) * a); }
   ctx.restore();
   // left column
   if (fade > 0) {
