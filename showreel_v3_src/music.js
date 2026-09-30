@@ -49,13 +49,16 @@ export async function renderMusic() {
   const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 2; lim.ratio.value = 12; lim.attack.value = 0.002; lim.release.value = 0.12;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.knee.value = 12; comp.ratio.value = 1.8; comp.attack.value = 0.02; comp.release.value = 0.3;
   const master = ctx.createGain(); master.gain.value = 0.75;
+  for (const nd of [master, comp, lim, out]) { nd.channelCountMode = 'explicit'; nd.channelCount = 2; }
   master.connect(comp); comp.connect(lim); lim.connect(out); out.connect(ctx.destination);
   const rev = ctx.createConvolver(); rev.buffer = ir; const revRet = ctx.createGain(); revRet.gain.value = 0.45; rev.connect(revRet); revRet.connect(master);
   const dIn = ctx.createGain(), dl = ctx.createDelay(2), dfb = ctx.createGain(), dlp = ctx.createBiquadFilter(), dRet = ctx.createGain();
   dl.delayTime.value = BEAT * 0.75; dfb.gain.value = 0.3; dlp.type = 'lowpass'; dlp.frequency.value = 2400; dRet.gain.value = 0.2;
   dIn.connect(dl); dl.connect(dlp); dlp.connect(dfb); dfb.connect(dl); dlp.connect(dRet); dRet.connect(master); dRet.connect(rev);
 
-  const filt = (type, f, q = 0.7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; return b; };
+  // filters and the master chain stay stereo: if a node's channel count flips as stereo noise sources start/stop, Chrome resets
+  // the filter state and each flip is an audible click
+  const filt = (type, f, q = 0.7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; b.channelCountMode = 'explicit'; b.channelCount = 2; return b; };
   const noise = (t, dur, dest) => { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.connect(dest); s.start(t, R() * 2, dur + 0.05); };
   const send = (node, dest, amt) => { const g = ctx.createGain(); g.gain.value = amt; node.connect(g); g.connect(dest); };
 
