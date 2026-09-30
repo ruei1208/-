@@ -1,17 +1,10 @@
-// TRWP showreel v3 — 60 s calm score. 80 BPM, 20 bars of 4/4 = 60.000 s exactly.
-export const SR = 48000, DUR = 60, BPM = 80, BEAT = 60 / BPM, BAR = BEAT * 4;
+// TRWP showreel v3 — calm score. 80 BPM; length and section cuts come from the chosen edit (edit.js).
+import { EDIT } from './edit.js';
+export const BPM = 80, BEAT = 60 / BPM, BAR = BEAT * 4, SR = 48000;
+export const BEATS = EDIT.BEATS, DUR = BEATS * BEAT, BARS = Math.ceil(BEATS / 4);
 export const B = n => n * BEAT;
 // section cuts (beats) shared with the picture
-export const CUT = { problemA: 8, problemB: 12, ppd: 16, limits: 20, physics: 27, rig: 36, device: 42, safety: 54, stat: 61, dyn: 66, spec: 71, end: 76 };
-// Each scene is animated on its own authored beat grid. Knots map timeline beat -> authored beat (slope 1 beyond the
-// outer knots): short text-heavy scenes get a longer hold, the device breakdown and a few longer scenes run a bit faster.
-export const CLOCK = {
-  intro: [[0, 0]], problemA: [[8, 8]], problemB: [[12, 12]], ppd: [[16, 15]],
-  limits: [[20, 18], [27, 26]], physics: [[27, 26], [36, 36]],
-  rig: [[36, 36], [40.8, 38.8]],                       // longer look at the rig; the zoom keeps its pace
-  device: [[42, 36], [47, 44], [54, 52]],               // assembly quicker, spec table close to its old pace
-  safety: [[54, 52], [61, 60]], stat: [[61, 60]], dyn: [[66, 64]], spec: [[71, 68]], end: [[76, 76]],
-};
+export const CUT = EDIT.CUT, CLOCK = EDIT.CLOCK;
 function warp(K, x) {
   if (x <= K[0][0]) return K[0][1] + x - K[0][0];
   for (let i = 0; i < K.length - 1; i++) if (x <= K[i + 1][0]) return K[i][1] + (x - K[i][0]) * (K[i + 1][1] - K[i][1]) / (K[i + 1][0] - K[i][0]);
@@ -19,24 +12,25 @@ function warp(K, x) {
 }
 export const clock = (scene, beat) => warp(CLOCK[scene], beat);                               // timeline -> authored
 export const at = (scene, beat) => warp(CLOCK[scene].map(([a, b]) => [b, a]), beat);       // authored -> timeline
+const END = CUT.end;
 
 const CH = {
   Fmaj7: { r: 41, v: [53, 57, 60, 64, 67] }, Am7: { r: 45, v: [57, 60, 64, 67, 71] },
   Dm9: { r: 38, v: [53, 57, 60, 64, 69] }, Cmaj7: { r: 36, v: [52, 55, 59, 62, 67] },
 };
 const CYCLE = ['Fmaj7', 'Am7', 'Dm9', 'Cmaj7'];
-const barChord = b => b === 19 ? 'Fmaj7' : CYCLE[b % 4];
+const barChord = b => b === BARS - 1 ? 'Fmaj7' : CYCLE[b % 4];
 const mtof = m => 440 * 2 ** ((m - 69) / 12);
 const inR = (b, ...ranges) => ranges.some(([a, z]) => b >= a && b < z);
 
 function arrangement() {
   const kicks = [], rims = [], ticks = [];
-  for (let b = 0; b < 80; b++) {
-    if (inR(b, [8, 76]) && b % 2 === 0) kicks.push(B(b));
-    if (inR(b, [CUT.limits, 76]) && b % 2 === 1) rims.push(B(b));
+  for (let b = 0; b < BEATS; b++) {
+    if (inR(b, [8, END]) && b % 2 === 0) kicks.push(B(b));
+    if (inR(b, [CUT.limits, END]) && b % 2 === 1) rims.push(B(b));
   }
-  for (let e = 0; e < 160; e++) { const b = e / 2; if (inR(b, [8, 76])) ticks.push(B(b)); }
-  kicks.push(B(76));
+  for (let e = 0; e < BEATS * 2; e++) { const b = e / 2; if (inR(b, [8, END])) ticks.push(B(b)); }
+  kicks.push(B(END));
   return { kicks, rims, ticks };
 }
 export const SYNC = arrangement();
@@ -51,7 +45,7 @@ export async function renderMusic() {
   const ir = ctx.createBuffer(2, SR * 3.8, SR);
   for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let lp = 0; for (let i = 0; i < d.length; i++) { const x = i / SR; lp = lp * 0.6 + (R() * 2 - 1) * 0.4; d[i] = lp * Math.exp(-x * 1.6) * Math.min(1, x / 0.02); } }
 
-  const out = ctx.createGain(); out.gain.setValueAtTime(0, 0); out.gain.linearRampToValueAtTime(1, 0.3); out.gain.setValueAtTime(1, 58.8); out.gain.linearRampToValueAtTime(0, 60);
+  const out = ctx.createGain(); out.gain.setValueAtTime(0, 0); out.gain.linearRampToValueAtTime(1, 0.3); out.gain.setValueAtTime(1, DUR - 1.2); out.gain.linearRampToValueAtTime(0, DUR);
   const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 2; lim.ratio.value = 12; lim.attack.value = 0.002; lim.release.value = 0.12;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.knee.value = 12; comp.ratio.value = 1.8; comp.attack.value = 0.02; comp.release.value = 0.3;
   const master = ctx.createGain(); master.gain.value = 0.75;
@@ -76,7 +70,7 @@ export async function renderMusic() {
     lp.connect(g); g.connect(p); p.connect(pianoBus);
   }
   const padLP = filt('lowpass', 700, 0.6); const padG = ctx.createGain(); padLP.connect(padG); padG.connect(master); send(padG, rev, 0.6);
-  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(76)); f.exponentialRampToValueAtTime(700, 60); }
+  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(END)); f.exponentialRampToValueAtTime(700, DUR); }
   function pad(t, notes, dur) {
     for (const m of notes) for (const [type, det, pan, a] of [['sawtooth', -7, -0.5, 0.010], ['sawtooth', 7, 0.5, 0.010], ['triangle', 0, 0, 0.022]]) {
       const o = ctx.createOscillator(); o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
@@ -112,25 +106,25 @@ export async function renderMusic() {
   function bell(t, m, v = 1) { for (const [h, a, d] of [[1, 1, 3.5], [2.76, 0.35, 1.6], [5.4, 0.12, 0.8]]) { const o = ctx.createOscillator(); o.frequency.value = mtof(m) * h; const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.035 * v * a, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(pianoBus); o.start(t); o.stop(t + d + 0.05); } }
 
   // ---------- arrangement
-  for (let bar = 0; bar < 20; bar++) {
-    const t = bar * BAR, c = CH[barChord(bar)], last = bar === 19;
+  for (let bar = 0; bar < BARS; bar++) {
+    const t = bar * BAR, c = CH[barChord(bar)], last = bar === BARS - 1;
     pad(t, c.v.slice(0, 4), last ? 1.4 : BAR);
     if (bar >= 2) sub(t, c.r + 12, last ? 2.6 : BAR);
     if (!last) piano(t, c.r + 24, 0.42, 3.2);
   }
-  for (let b = 0; b < 76; b++) {
+  for (let b = 0; b < END; b++) {
     const c = CH[barChord(Math.floor(b / 4))], k = b % 4;
     if (inR(b, [0, 8])) { piano(B(b), c.v[[2, 3, 4, 1][k]] + 12, [0.45, 0.6, 0.5, 0.55][k], 2.8, (k - 1.5) * 0.15); continue; }
     const seq = [0, 2, 4, 3, 1, 3, 4, 2];
     for (const h of [0, 1]) { const i = k * 2 + h; piano(B(b + h / 2), c.v[seq[i]] + 12, h ? 0.32 : 0.46, 2.0, (seq[i] - 2) * 0.12); }
-    if (inR(b, [CUT.stat, 76])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
+    if (inR(b, [CUT.stat, END])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
   }
-  SYNC.kicks.forEach(t => kick(t, t >= B(76) ? 0.8 : 1));
+  SYNC.kicks.forEach(t => kick(t, t >= B(END) ? 0.8 : 1));
   SYNC.rims.forEach(t => rim(t, 0.8));
   SYNC.ticks.forEach((t, i) => tick(t, i % 2 ? 0.45 : 0.7));
-  for (let e = 0; e < 320; e++) { const b = e / 4; if (inR(b, [CUT.physics, 76])) shaker(B(b), e % 2 ? 0.6 : 1); }
+  for (let e = 0; e < BEATS * 4; e++) { const b = e / 4; if (inR(b, [CUT.physics, END])) shaker(B(b), e % 2 ? 0.6 : 1); }
   [[0.05, 1.4], [B(CUT.limits), 0.6], [B(CUT.physics), 0.8], [B(CUT.rig), 1.2], [B(CUT.device), 1.6], [B(CUT.safety), 0.8], [B(CUT.end), 1.0]].forEach(([t, d]) => pencil(t, d));
-  Object.values(CUT).forEach(b => airWhoosh(B(b), 0.9));
+  Object.values(CUT).filter(b => b > 0).forEach(b => airWhoosh(B(b), 0.9));
   // device (authored beats, placed through its clock): plates land, cartridge + dust box click in, scan shimmer, pull-out
   const dv = b => B(at('device', b)), sf = b => B(at('safety', b));
   [38.5, 39, 39.5, 40].forEach(b => thud(dv(b), 0.8));
@@ -140,7 +134,7 @@ export async function renderMusic() {
   // safety: relay opens (the groove carries on underneath)
   click(sf(56), 0.9);
   // finale
-  [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(B(76) + i * 0.045, m, 0.55, 3.4, (i - 4) * 0.08));
-  bell(B(76), 76, 1); bell(B(77), 79, 0.6); bell(B(78), 84, 0.45);
+  [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(B(END) + i * 0.045, m, 0.55, 3.4, (i - 4) * 0.08));
+  bell(B(END), 76, 1); bell(B(END + 1), 79, 0.6); bell(B(END + 2), 84, 0.45);
   return await ctx.startRendering();
 }
