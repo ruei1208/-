@@ -418,7 +418,7 @@ function sDevice(ctx, t) {
     const a = project([hx + 18, -hy, hz]), b = project([hx + 18, hy, hz]); dim(ctx, a[0] + 20, a[1], b[0] + 20, b[1], '172.7 mm', dp, C.ink, 0, fM(500, 22));
     const c = project([-hx, -hy - 14, hz + 10]), d = project([hx, -hy - 14, hz + 10]); dim(ctx, c[0], c[1] + 16, d[0], d[1] + 16, '100 mm', dp, C.ink, 0, fM(500, 22)); }
   // spec table
-  const tw2 = 600, rows = [['HV', '直流高壓電場', '15 kV'], ['GAP', '平行極板間距', '17 mm'], ['MOTOR', '輪轂馬達', '48 V'], ['RPM', '最高轉速 ≈ 33 km/h', '350'], ['BODY', '3D 列印絕緣外殼', 'PLA'], ['FUSE', '過電流保護', '2 A'], ['SEAL', '高壓端子絕緣', '熱熔膠']];
+  const tw2 = 600, rows = [['HV', '直流高壓電場', '15 kV'], ['GAP', '平行極板間距', '17 mm'], ['BODY', '3D 列印絕緣外殼', 'PLA'], ['FUSE', '過電流保護', '2 A'], ['SEAL', '高壓端子絕緣', '熱熔膠']];
   const th = s(44.4);
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, rx, 350, rx + tw2, 350, tw(t, th, th + 0.6, E.ioC)); ctx.restore();
   rows.forEach(([k, d, v], i) => { const t0 = th + B(0.5) * i, y = 350 + (i + 1) * 70;

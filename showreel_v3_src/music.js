@@ -32,10 +32,10 @@ const inR = (b, ...ranges) => ranges.some(([a, z]) => b >= a && b < z);
 function arrangement() {
   const kicks = [], rims = [], ticks = [];
   for (let b = 0; b < 80; b++) {
-    if (inR(b, [8, CUT.safety], [CUT.stat, 76]) && b % 2 === 0) kicks.push(B(b));
-    if (inR(b, [CUT.limits, CUT.safety], [CUT.stat, 76]) && b % 2 === 1) rims.push(B(b));
+    if (inR(b, [8, 76]) && b % 2 === 0) kicks.push(B(b));
+    if (inR(b, [CUT.limits, 76]) && b % 2 === 1) rims.push(B(b));
   }
-  for (let e = 0; e < 160; e++) { const b = e / 2; if (inR(b, [8, CUT.safety], [CUT.stat, 76])) ticks.push(B(b)); }
+  for (let e = 0; e < 160; e++) { const b = e / 2; if (inR(b, [8, 76])) ticks.push(B(b)); }
   kicks.push(B(76));
   return { kicks, rims, ticks };
 }
@@ -76,7 +76,7 @@ export async function renderMusic() {
     lp.connect(g); g.connect(p); p.connect(pianoBus);
   }
   const padLP = filt('lowpass', 700, 0.6); const padG = ctx.createGain(); padLP.connect(padG); padG.connect(master); send(padG, rev, 0.6);
-  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(520, B(CUT.safety + 3)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(76)); f.exponentialRampToValueAtTime(700, 60); }
+  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(76)); f.exponentialRampToValueAtTime(700, 60); }
   function pad(t, notes, dur) {
     for (const m of notes) for (const [type, det, pan, a] of [['sawtooth', -7, -0.5, 0.010], ['sawtooth', 7, 0.5, 0.010], ['triangle', 0, 0, 0.022]]) {
       const o = ctx.createOscillator(); o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
@@ -121,17 +121,14 @@ export async function renderMusic() {
   for (let b = 0; b < 76; b++) {
     const c = CH[barChord(Math.floor(b / 4))], k = b % 4;
     if (inR(b, [0, 8])) { piano(B(b), c.v[[2, 3, 4, 1][k]] + 12, [0.45, 0.6, 0.5, 0.55][k], 2.8, (k - 1.5) * 0.15); continue; }
-    if (inR(b, [CUT.safety + 1, CUT.stat])) { continue; }
     const seq = [0, 2, 4, 3, 1, 3, 4, 2];
     for (const h of [0, 1]) { const i = k * 2 + h; piano(B(b + h / 2), c.v[seq[i]] + 12, h ? 0.32 : 0.46, 2.0, (seq[i] - 2) * 0.12); }
     if (inR(b, [CUT.stat, 76])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
   }
-  // rain: sparse high drops during the fail-safe section
-  [[53, 4], [53.75, 2], [54.5, 3], [55.25, 1], [55.5, 4], [56.5, 3], [57.25, 2], [58, 4], [58.75, 1], [59.25, 3]].map(([b, i]) => [at('safety', b), i]).forEach(([b, i], n) => piano(B(b), CH[barChord(Math.floor(b / 4))].v[i] + 24, 0.3 - n * 0.008, 1.9, 0.4 - i * 0.15));
   SYNC.kicks.forEach(t => kick(t, t >= B(76) ? 0.8 : 1));
   SYNC.rims.forEach(t => rim(t, 0.8));
   SYNC.ticks.forEach((t, i) => tick(t, i % 2 ? 0.45 : 0.7));
-  for (let e = 0; e < 320; e++) { const b = e / 4; if (inR(b, [CUT.physics, CUT.safety], [CUT.stat, 76])) shaker(B(b), e % 2 ? 0.6 : 1); }
+  for (let e = 0; e < 320; e++) { const b = e / 4; if (inR(b, [CUT.physics, 76])) shaker(B(b), e % 2 ? 0.6 : 1); }
   [[0.05, 1.4], [B(CUT.limits), 0.6], [B(CUT.physics), 0.8], [B(CUT.rig), 1.2], [B(CUT.device), 1.6], [B(CUT.safety), 0.8], [B(CUT.end), 1.0]].forEach(([t, d]) => pencil(t, d));
   Object.values(CUT).forEach(b => airWhoosh(B(b), 0.9));
   // device (authored beats, placed through its clock): plates land, cartridge + dust box click in, scan shimmer, pull-out
@@ -140,8 +137,8 @@ export async function renderMusic() {
   slide(dv(40.75), dv(41.5)); click(dv(41.5), 1); slide(dv(41.8), dv(42.5)); click(dv(42.5), 0.9);
   swell(dv(42.8), dv(43.5), 0.7);
   slide(dv(48), dv(49)); slide(dv(50), dv(51)); click(dv(51), 0.8);
-  // safety: relay opens
-  click(sf(56), 1.3); powerDown(sf(56) + 0.01); swell(sf(58.5), sf(60), 1);
+  // safety: relay opens (the groove carries on underneath)
+  click(sf(56), 0.9);
   // finale
   [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(B(76) + i * 0.045, m, 0.55, 3.4, (i - 4) * 0.08));
   bell(B(76), 76, 1); bell(B(77), 79, 0.6); bell(B(78), 84, 0.45);
