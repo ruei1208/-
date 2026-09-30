@@ -153,10 +153,10 @@ function sIntro(ctx, t) {
   ctx.restore();
   const tx = 1060;
   kicker(ctx, tx, 290, 'TRWP · 主動式靜電捕捉裝置', t, 0.3);
-  reveal(ctx, '廢氣排放正在減少。', tx, 380, { t, t0: s(1), font: fS(700, 54), size: 54, color: C.mute, stagger: 0.04, dur: 0.9 });
-  reveal(ctx, '但電動車更重、扭力更大——', tx, 446, { t, t0: s(2.5), font: fS(700, 34), size: 34, color: C.mute, stagger: 0.03, dur: 0.9 });
-  reveal(ctx, '輪胎，', tx, 600, { t, t0: s(4), font: fS(900, 118), size: 118, stagger: 0.08, dur: 1.0 });
-  reveal(ctx, '仍在一路磨損。', tx, 740, { t, t0: s(5), font: fS(900, 118), size: 118, color: C.acc, stagger: 0.07, dur: 1.0 });
+  reveal(ctx, '廢氣排放正在減少，', tx, 380, { t, t0: s(1), font: fS(700, 54), size: 54, color: C.mute, stagger: 0.04, dur: 0.9 });
+  reveal(ctx, '但電動車更重、扭力更大，輪胎磨損並未改善。', tx, 446, { t, t0: s(2.5), font: fS(700, 34), size: 34, color: C.mute, stagger: 0.03, dur: 0.9 });
+  reveal(ctx, '車輛排放', tx, 600, { t, t0: s(4), font: fS(900, 104), size: 104, stagger: 0.08, dur: 1.0 });
+  reveal(ctx, '不只來自排氣管', tx, 730, { t, t0: s(5), font: fS(900, 104), size: 104, color: C.acc, stagger: 0.07, dur: 1.0 });
   ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, tx, 780, tx + 800, 780, tw(t, s(6.2), s(7.2), E.ioC));
   txt(ctx, 'NON-EXHAUST EMISSIONS', tx + 800, 820, fM(500, 20), C.mute, 'right', tw(t, s(6.5), s(7.2)), 3);
 }
@@ -233,7 +233,7 @@ function sPPD(ctx, t) {                          // beats 15-18
 // ================================================================ 2 current solutions (beats 18-26)
 function sLimits(ctx, t) {
   kicker(ctx, 140, 170, '02 — CURRENT SOLUTIONS', t, s(18));
-  reveal(ctx, '現有方案，卡在哪裡？', 140, 256, { t, t0: s(18.2), font: fS(900, 64), size: 64, stagger: 0.05, dur: 0.9 });
+  reveal(ctx, '現有方案的限制', 140, 256, { t, t0: s(18.2), font: fS(900, 64), size: 64, stagger: 0.05, dur: 0.9 });
   const card = (x, y, w, h, t0) => { ctx.save(); ctx.strokeStyle = C.dim; ctx.lineWidth = 1.5; poly(ctx, rectPts(x, y, w, h), tw(t, t0, t0 + 0.9, E.ioC), true); ctx.restore(); };
   // --- card 1: physical filter
   card(140, 320, 780, 540, s(19));
@@ -259,9 +259,9 @@ function sLimits(ctx, t) {
     if (x > 1760 || y > 840) continue;
     if (big) { ctx.strokeStyle = rgba(C.ink, 0.7); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, 7, 0, TAU); ctx.stroke(); }
     else { ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(x, y, 2.6, 0, TAU); ctx.fill(); } }
-  txt(ctx, 'PM2.5 穿過', 1740, 450, fS(900, 28), C.acc, 'right', tw(t, s(22.8), s(23.4)));
-  reveal(ctx, '× 只靠慣性分離', 1040, 780, { t, t0: s(23), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
-  reveal(ctx, '× 細懸浮微粒 PM2.5 抓不住', 1040, 830, { t, t0: s(23.5), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
+  txt(ctx, 'PM2.5 通過', 1740, 450, fS(900, 28), C.acc, 'right', tw(t, s(22.8), s(23.4)));
+  reveal(ctx, '× 主要依賴慣性分離', 1040, 780, { t, t0: s(23), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
+  reveal(ctx, '× 對細懸浮微粒 PM2.5 捕捉有限', 1040, 830, { t, t0: s(23.5), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
   // bridge
   if (!EDIT.LONG) { ctx.save(); ctx.fillStyle = C.acc; ctx.fillRect(140, 918, 18 * tw(t, s(24.2), s(24.7)), 18); ctx.restore(); }
   if (!EDIT.LONG) reveal(ctx, '本專題 → 無濾網的主動式靜電捕捉', 176, 936, { t, t0: s(24.3), font: fS(900, 34), size: 34, color: C.acc, stagger: 0.03 });
@@ -272,8 +272,8 @@ function lerpHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b
 const PL = { x0: 140, x1: 1060, top: 390, bot: 740, th: 24 };
 function sPhysics(ctx, t) {
   kicker(ctx, 140, 170, '03 — HOW IT WORKS', t, s(26));
-  const tx = reveal(ctx, '不靠濾網，', 140, 262, { t, t0: s(26), font: fS(900, 62), size: 62, dur: 0.9 });
-  reveal(ctx, '用電場把微粒拉下來。', 140 + tx, 262, { t, t0: s(26.6), font: fS(900, 62), size: 62, color: C.acc, dur: 0.9 });
+  const tx = reveal(ctx, '不使用濾網，', 140, 262, { t, t0: s(26), font: fS(900, 62), size: 62, dur: 0.9 });
+  reveal(ctx, '以電場吸附微粒', 140 + tx, 262, { t, t0: s(26.6), font: fS(900, 62), size: 62, color: C.acc, dur: 0.9 });
   const pd = tw(t, s(26), s(27.5), E.ioC), fOn = s(27.3), on = t >= fOn, onP = tw(t, fOn, fOn + 0.8);
   ctx.save(); ctx.lineWidth = 2;
   for (const y of [PL.top, PL.bot]) { ctx.strokeStyle = on ? C.acc : C.ink; poly(ctx, rectPts(PL.x0, y, PL.x1 - PL.x0, PL.th), pd, true); hatch(ctx, PL.x0, y, PL.x1 - PL.x0, PL.th, 10, on ? rgba(C.acc, 0.6) : rgba(C.ink, 0.4), tw(t, s(26.8), s(27.8), E.ioC)); }
@@ -382,7 +382,7 @@ function sRig(ctx, t) {
     reveal(ctx, '整體模組', 140, 290, { t, t0: s(36.1), font: fS(700, 36), size: 36, color: C.mute, stagger: 0.04, alpha: fade });
     reveal(ctx, '輪轂馬達 × 捕捉裝置', 140, 400, { t, t0: s(36.3), font: fS(900, 68), size: 68, color: C.acc, stagger: 0.04, dur: 0.9, alpha: fade });
     reveal(ctx, '輪胎摩擦砂紙揚起粉塵，', 140, 490, { t, t0: s(36.9), font: fS(700, 32), size: 32, color: C.ink2, stagger: 0.02, alpha: fade });
-    reveal(ctx, '裝置鎖在馬達後方，就地攔截。', 140, 540, { t, t0: s(37.3), font: fS(700, 32), size: 32, color: C.ink2, stagger: 0.02, alpha: fade });
+    reveal(ctx, '裝置固定於馬達後方收集粉塵。', 140, 540, { t, t0: s(37.3), font: fS(700, 32), size: 32, color: C.ink2, stagger: 0.02, alpha: fade });
     [['48 V', '輪轂馬達'], ['350', 'RPM 最高轉速'], ['Ø 50', 'cm 輪胎外徑'], ['≈ 33', 'km/h 等效車速']].forEach(([v, l], i) => {
       const x = 140 + i * 215, t0 = s(37.1) + i * 0.1;
       ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = i === 1 ? C.acc : C.line; ctx.lineWidth = 1.5; seg(ctx, x, 640, x + 185, 640, tw(t, t0, t0 + 0.5, E.ioC)); ctx.restore();
@@ -477,8 +477,8 @@ function sSafety(ctx, t) {
   const ra = tw(t, vv(27), vv(28), E.outC); if (ra > 0) { ctx.save(); ctx.strokeStyle = rgba(C.ink, 0.13 * ra); ctx.lineWidth = 1;
     for (let i = 0; i < 120; i++) { const sp = 900 + hash(i) * 600, x = hash(i * 3.3) * (W + 200) - 100, y = ((t * sp + hash(i * 7) * (H + 200)) % (H + 200)) - 100; seg(ctx, x, y, x - 8, y + 36, 1); } ctx.restore(); }
   kicker(ctx, 140, 170, '05 — FAIL-SAFE', t, s(52));
-  const w1 = reveal(ctx, '下雨了？', 140, 256, { t, t0: s(52), font: fS(900, 62), size: 62, dur: 0.9 });
-  reveal(ctx, '高壓自動斷電。', 160 + w1, 256, { t, t0: s(52.6), font: fS(900, 62), size: 62, color: C.acc, dur: 0.9 });
+  const w1 = reveal(ctx, '雨滴感測：', 140, 256, { t, t0: s(52), font: fS(900, 62), size: 62, dur: 0.9 });
+  reveal(ctx, '雨天自動切斷高壓', 150 + w1, 256, { t, t0: s(52.6), font: fS(900, 62), size: 62, color: C.acc, dur: 0.9 });
   reveal(ctx, 'NO 常開接點：控制失效時，高壓預設關閉', 140, 330, { t, t0: vv(30), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.02 });
   const Y = 480, xs = [210, 460, 710, 960, 1210, 1460, 1710], LY = 760, BW = 196, BH = 116;
   const main = [['plug', '110V 市電'], ['xfmr', '變壓器 12V'], ['fuse', '保險絲 2A'], ['switch', '手動開關'], ['relay', '繼電器 NO'], ['bolt', '升壓 15 kV'], ['plates', '銅片極板']];
@@ -599,8 +599,8 @@ function sEnd(ctx, t) {
   [-1, 0, 1].forEach((k, i) => { const p = spring(t - t0 - 0.25 - i * 0.1, 2, 0.5); if (p <= 0) return; const bw = 15, bh = 116 * Math.min(1.05, p), bx = cx + k * 36 - bw / 2;
     ctx.save(); ctx.strokeStyle = k === 0 ? C.acc : C.ink; ctx.lineWidth = 2; ctx.strokeRect(bx, cy - bh / 2, bw, bh); if (k === 0) { ctx.fillStyle = rgba(C.acc, clamp(p)); ctx.fillRect(bx, cy - bh / 2, bw, bh); } ctx.restore(); });
   reveal(ctx, 'TRWP', cx, 610, { t, t0: t0 + 0.35, font: fM(600, 120), size: 120, align: 'center', ls: 30, stagger: 0.06 });
-  reveal(ctx, '在源頭，攔下它。', cx, 700, { t, t0: t0 + 0.7, font: fS(900, 44), size: 44, align: 'center', stagger: 0.04 });
-  txt(ctx, 'CAPTURE IT AT THE SOURCE.', cx, 752, fM(500, 22), C.acc, 'center', tw(t, t0 + 0.95, t0 + 1.5), 6);
+  reveal(ctx, '為非廢氣排放提供硬體解決方案', cx, 700, { t, t0: t0 + 0.7, font: fS(900, 44), size: 44, align: 'center', stagger: 0.04 });
+  txt(ctx, 'A HARDWARE APPROACH TO NON-EXHAUST EMISSIONS', cx, 752, fM(500, 20), C.acc, 'center', tw(t, t0 + 0.95, t0 + 1.5), 4);
   reveal(ctx, '主動式輪胎磨損微粒靜電捕捉裝置', cx, 830, { t, t0: t0 + 1.1, font: fS(700, 32), size: 32, align: 'center', color: C.ink2, stagger: 0.02 });
   if (!EDIT.LONG) txt(ctx, '中原大學機械系 · 指導教授 杜哲怡', cx, 890, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.35, t0 + 1.9));
   if (!EDIT.LONG) txt(ctx, '專題生 陳睿瑀 · 李恩 · 林子鈞', cx, 932, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.5, t0 + 2.05));
@@ -646,7 +646,7 @@ function sApproach(ctx, t) {
   const cards = [
     ['nofilter', '不需濾網', '避免濾網造成的額外風阻', '也沒有濾網堵塞的問題'],
     ['bolt', '電場主動吸附', '以 15 kV 電場的庫侖力', '偏折並吸附導電微粒'],
-    ['hub', '整合輪轂馬達', '模組化設計，搭載於', '驅動輪後方就地捕捉']];
+    ['hub', '整合輪轂馬達', '模組化設計，搭載於', '驅動輪後方收集粉塵']];
   cards.forEach(([ic, h, l1, l2], i) => { const x = 140 + i * 560, y = 420, t0 = s(1.4) + i * B(0.6), p = tw(t, t0, t0 + 0.8, E.ioC);
     frame(ctx, x, y, 520, 330, p);
     const ix = x + 60, iy = y + 70, ip = tw(t, t0 + 0.3, t0 + 0.9, E.ioC);
@@ -668,7 +668,7 @@ function sApproach(ctx, t) {
 
 // 03 — which particles get caught
 function sCharge(ctx, t) {
-  heading(ctx, t, '03 — PARTICLE CHARGING', '哪些微粒會被抓住？');
+  heading(ctx, t, '03 — PARTICLE CHARGING', '微粒荷電與捕捉原理');
   const x0 = 140, x1 = 1040, top = 390, bot = 740, th = 22, pp = tw(t, s(0.5), s(1.5), E.ioC);
   ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; for (const y of [top - th, bot]) { poly(ctx, rectPts(x0, y, x1 - x0, th), pp, true); hatch(ctx, x0, y, x1 - x0, th, 9, rgba(C.acc, 0.5), pp); } ctx.restore();
   txt(ctx, '+15 kV', x0, top - th - 14, fM(500, 20), C.acc, 'left', tw(t, s(1), s(1.5)), 1); txt(ctx, '接地', x0, bot + th + 30, fS(700, 20), C.mute, 'left', tw(t, s(1), s(1.5)));
@@ -770,7 +770,7 @@ function sImaging(ctx, t) {
 
 // 06 — where the dust goes (drawn to scale: 50 cm tyre; device housing 4 cm deep, 17.27 cm tall)
 function sEnvelope(ctx, t) {
-  heading(ctx, t, '06 — DUST ENVELOPE', '粉塵往哪裡飛？');
+  heading(ctx, t, '06 — DUST ENVELOPE', '粉塵擴散範圍量測');
   const k = 11, x0 = 440, gy = 860, X = c => x0 + c * k, Y = h => gy - h * k, TR = 25 * k;
   tireLine(ctx, X(0), gy - TR, TR, -t * 3, t, s(0.2), 0.6);
   dim(ctx, X(-25), gy - 2 * TR - 30, X(25), gy - 2 * TR - 30, 'Ø 50 cm', tw(t, s(1), s(1.8), E.lin), C.mute, 0, fM(500, 20));
@@ -804,7 +804,7 @@ function sEnvelope(ctx, t) {
   const rx = 1180;
   reveal(ctx, '27 cm 處沉積最多', rx, 400, { t, t0: s(2.6), font: fS(900, 40), size: 40, color: C.acc, stagger: 0.03 });
   txt(ctx, '該處沉積寬度約 21 cm', rx, 446, fS(700, 26), C.ink2, 'left', tw(t, s(3), s(3.5)));
-  reveal(ctx, '裝置越貼近輪胎越好？', rx, 540, { t, t0: s(3.6), font: fS(900, 32), size: 32, stagger: 0.03 });
+  reveal(ctx, '距離輪胎越近，沉積量不一定越多', rx, 540, { t, t0: s(3.6), font: fS(900, 32), size: 32, stagger: 0.03 });
   reveal(ctx, '1 cm 處的沉積量反而低於 3、5 cm', rx, 588, { t, t0: s(4), font: fS(700, 26), size: 26, color: C.ink2, stagger: 0.015 });
   bullet(ctx, rx, 660, tw(t, s(4.6), s(5)));
   reveal(ctx, '依實際擴散分布決定裝置位置', rx + 28, 660, { t, t0: s(4.7), font: fS(900, 30), size: 30, color: C.acc, stagger: 0.025 });
