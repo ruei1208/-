@@ -324,18 +324,19 @@ function angleBar(ctx, a, b, w, p, solid = Infinity) {
   ctx.restore();
 }
 function sRig(ctx, t) {
-  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8;
-  const BE = [1660, 531], BA = 0.82, bw = 24;   // brace end, and where along it the device's top is clamped
+  const cx = 1290, cy = 480, R = 210, gy = cy + R, gyB = gy + 8, PX = R / 25, bw = 24;   // drawn to scale: 50 cm tyre, PX = px per cm
   const RH = EDIT.RIG_HOLD, zp = tw(t, s(38.9 + RH), s(39.9 + RH), E.ioC), fade = 1 - tw(t, s(38.8 + RH), s(39.4 + RH));
   // capture device, side-on between the two braces; the zoom swings the camera round to the next scene's framing
-  const K = 0.3, z = lerp(1, 1 / K, zp), ks = K * z;   // zoom, and on-screen scale of the device (1 = next scene's framing)
   const pose = (az, el, lookY, dist, drawP) => { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP, az, el, dist, offX: 380, lookY }); D3.camera.updateMatrixWorld(); };
+  pose(90, 6, 0, 900, 1); const topU = project([0, 0, 0])[1] - project([0, D3.hSize[1] / 2, 0])[1];
+  const K = (D3.hSize[1] / 10 * PX / 2) / topU, z = lerp(1, 1 / K, zp), ks = K * z;   // device at the tyre's scale; zoom ends on the next scene's framing
   pose(58, 24, -40, 900, 1); const fbF = project([0, 0, 0]);
   pose(90, 6, 0, 900 / K, 1); const c0 = project([0, 0, 0]), top0 = c0[1] - project([0, D3.hSize[1] / 2, 0])[1];   // centre-to-top, side view
   const hw0 = Math.max(...[-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => Math.abs(project([x * D3.hSize[0] / 2, y * D3.hSize[1] / 2, zz * D3.hSize[2] / 2])[0] - c0[0])))));
-  const mx = lerp(cx, BE[0], BA), my = lerp(cy, BE[1], BA), dcx = mx, dcy = my - bw / 2 + 4 + top0;
+  // intake face 25 cm behind the contact patch, housing bottom 2 cm above the sandpaper; its top is clamped between the braces
+  const dcx = cx + 25 * PX + hw0, dcy = gy - 2 * PX - top0, mx = dcx, my = dcy - top0 + bw / 2 - 4;
   const bl = Math.hypot(mx - cx, my - cy), BT = [mx + (mx - cx) / bl * 22, my + (my - cy) / bl * 22];   // brace stops just past the clamp bolts
-  const OV = 90, X0 = cx - R - OV, X1 = mx + hw0 + OV;   // board overhangs the wheel and the device equally   // housing top is clamped between the near and far braces; the rest hangs clear of the board
+  const OV = 90, X0 = cx - R - OV, X1 = mx + hw0 + OV;   // board overhangs the wheel and the device equally
   pose(lerp(90, 58, zp), lerp(6, 24, zp), lerp(0, -40, zp), 900 / ks, tw(t, s(36.6), s(37.9), E.ioC));
   const fb = project([0, 0, 0]), img = render('wire');
   const hs = D3.hSize, cs = [-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(zz => project([x * hs[0] / 2, y * hs[1] / 2, zz * hs[2] / 2]))));
@@ -691,19 +692,21 @@ function sCharge(ctx, t) {
 // 04 — build and bench verification
 function sBuild(ctx, t) {
   heading(ctx, t, '04 — BUILD & VERIFY', '製作與設計驗證');
-  // plate stack cross-section (top view)
-  const ox = 180, oy = 380, pw = 640, ph = 420, pp = tw(t, s(0.5), s(1.5), E.ioC);
+  // plate stack cross-section, top view, to scale (housing 100 × 40 mm, plates 1 × 30 mm at 17 mm pitch)
+  const mm = 6.4, ox = 180, oy = 470, pw = 100 * mm, ph = 40 * mm, pp = tw(t, s(0.5), s(1.5), E.ioC);
   frame(ctx, ox, oy, pw, ph, pp, C.ink2, 1.8); txt(ctx, 'PLA 絕緣外殼', ox, oy - 16, fS(700, 22), C.mute, 'left', tw(t, s(1.2), s(1.7)));
-  const px = [0, 1, 2, 3].map(k => ox + 170 + k * 100);
-  px.forEach((x, k) => { ctx.save(); ctx.fillStyle = rgba(C.acc, 0.85); ctx.fillRect(x - 3, oy + 60, 6, (ph - 120) * tw(t, s(1) + k * 0.1, s(1.6) + k * 0.1, E.ioC)); ctx.restore(); });
-  for (const y of [oy + 110, oy + ph - 110]) { const p = tw(t, s(1.8), s(2.4), E.ioC); ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6; rr(ctx, px[0] - 30, y - 9, (px[3] - px[0] + 60) * p, 18, 9); ctx.stroke(); ctx.restore(); }
-  dim(ctx, px[1], oy + ph / 2, px[2], oy + ph / 2, '17 mm', tw(t, s(2.2), s(3), E.lin), C.ink, 0, fM(500, 20));
+  dim(ctx, ox, oy + ph + 40, ox + pw, oy + ph + 40, '100 mm', tw(t, s(1.2), s(2), E.lin), C.mute, 0, fM(500, 18));
+  dim(ctx, ox - 40, oy, ox - 40, oy + ph, '40 mm', tw(t, s(1.2), s(2), E.lin), C.mute, 0, fM(500, 18));
+  const pz0 = oy + 5 * mm, px = [0, 1, 2, 3].map(k => ox + pw / 2 + (k - 1.5) * 17 * mm);
+  px.forEach((x, k) => { ctx.save(); ctx.fillStyle = rgba(C.acc, 0.9); ctx.fillRect(x - mm / 2, pz0, mm, 30 * mm * tw(t, s(1) + k * 0.1, s(1.6) + k * 0.1, E.ioC)); ctx.restore(); });
+  for (const y of [pz0 + 5 * mm, pz0 + 25 * mm]) { const p = tw(t, s(1.8), s(2.4), E.ioC); ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6; rr(ctx, px[0] - 4 * mm, y - 1.5 * mm, (px[3] - px[0] + 8 * mm) * p, 3 * mm, 1.5 * mm); ctx.stroke(); ctx.restore(); }
+  dim(ctx, px[1], pz0 + 15 * mm, px[2], pz0 + 15 * mm, '17 mm', tw(t, s(2.2), s(3), E.lin), C.ink, 0, fM(500, 18));
   { const p = tw(t, s(2.6), s(3.2)); ctx.save(); ctx.globalAlpha = p; ctx.fillStyle = rgba(C.ink2, 0.25); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.2; ctx.beginPath();
-    for (let k = 0; k <= 16; k++) { const a = k / 16 * TAU, r = 30 + 8 * Math.sin(k * 2.3); ctx.lineTo(px[0] - 70 + Math.cos(a) * r, oy + 60 + Math.sin(a) * r * 0.8); } ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+    for (let k = 0; k <= 16; k++) { const a = k / 16 * TAU, r = 3 * mm + 0.8 * mm * Math.sin(k * 2.3); ctx.lineTo(px[0] - 7 * mm + Math.cos(a) * r, pz0 + 3 * mm + Math.sin(a) * r * 0.8); } ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
   const lab = (x, y, tx, ty, l, t0) => { const p = tw(t, t0, t0 + 0.5); if (p <= 0) return; ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.mute; ctx.lineWidth = 1; poly(ctx, [[x, y], [tx, ty]], p); ctx.restore(); txt(ctx, l, tx + 6, ty + 8, fS(700, 24), C.ink2, 'left', p); };
-  lab(px[3] + 40, oy + 110, ox + pw + 30, oy + 90, '尼龍絕緣柱定距', s(2.2));
-  lab(px[3], oy + 280, ox + pw + 30, oy + 250, '銅片極板', s(2.4));
-  lab(px[0] - 70, oy + 30, ox + pw + 30, oy + 20, '高壓端子封膠', s(2.8));
+  lab(px[3] + 4 * mm, pz0 + 5 * mm, ox + pw + 30, oy - 30, '尼龍絕緣柱定距', s(2.2));
+  lab(px[3], pz0 + 18 * mm, ox + pw + 30, oy + 120, '銅片極板 ×4', s(2.4));
+  lab(px[0] - 7 * mm, pz0, ox + pw + 30, oy - 80, '高壓端子封膠', s(2.8));
   // results table
   const tx = 1110, rows = [['高壓電源鏈路', '空載與載入極板皆正常運作'], ['極板定距', '外力推壓與振動後無位移'], ['絕緣封裝', '連續通電未見漏電或跳火'], ['動態運轉', '馬達振動環境下未見異常放電']];
   txt(ctx, '驗證結果', tx, 400, fS(900, 32), C.ink, 'left', tw(t, s(2.8), s(3.3)));
@@ -761,7 +764,7 @@ function sImaging(ctx, t) {
   txt(ctx, 'R² = 0.95', 1720, 400, fM(500, 20), C.mute, 'right', tw(t, s(3.2), s(3.7)));
 }
 
-// 06 — where the dust goes (drawn to scale: 50 cm tyre, 17 cm device)
+// 06 — where the dust goes (drawn to scale: 50 cm tyre; device housing 4 cm deep, 17.27 cm tall)
 function sEnvelope(ctx, t) {
   heading(ctx, t, '06 — DUST ENVELOPE', '粉塵往哪裡飛？');
   const k = 11, x0 = 440, gy = 860, X = c => x0 + c * k, Y = h => gy - h * k, TR = 25 * k;
@@ -782,7 +785,7 @@ function sEnvelope(ctx, t) {
   { const p = tw(t, s(3), s(3.5)); ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.mute; ctx.lineWidth = 1; ctx.setLineDash([3, 5]); seg(ctx, X(30), Y(14), X(30), gy); ctx.restore();
     txt(ctx, '最高 14 cm', X(30) + 12, Y(14) - 10, fS(900, 22), C.acc, 'left', p); }
   // device at 25 cm, 17 cm tall, standing beside the contact patch; the dust path runs through it
-  const dx0 = X(25), dw = 5 * k, dh = 17.3 * k, dp = tw(t, s(1.2), s(1.8));
+  const dx0 = X(25), dw = 4 * k, dh = 17.27 * k, dp = tw(t, s(1.2), s(1.8));
   ctx.save(); ctx.globalAlpha = dp; ctx.fillStyle = rgba(C.bg, 0.6); ctx.fillRect(dx0, gy - dh, dw, dh); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(dx0, gy - dh, dw, dh);
   ctx.strokeStyle = C.acc; ctx.lineWidth = 1.6; for (let j = 0; j < 3; j++) seg(ctx, dx0 + 14 + j * 14, gy - dh + 14, dx0 + 14 + j * 14, gy - 12, 1); ctx.restore();
   txt(ctx, '裝置位置 25 cm', dx0 + dw + 14, gy - 22, fS(900, 24), C.ink, 'left', dp);
