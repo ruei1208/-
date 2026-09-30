@@ -761,28 +761,38 @@ function sImaging(ctx, t) {
   txt(ctx, 'R² = 0.95', 1720, 400, fM(500, 20), C.mute, 'right', tw(t, s(3.2), s(3.7)));
 }
 
-// 06 — where the dust goes
+// 06 — where the dust goes (drawn to scale: 50 cm tyre, 17 cm device)
 function sEnvelope(ctx, t) {
   heading(ctx, t, '06 — DUST ENVELOPE', '粉塵往哪裡飛？');
-  const gy = 820, X = c => 330 + c * 17, Y = h => gy - h * 20;
-  tireLine(ctx, X(0) - 10, gy - 150, 150, -t * 6, t, s(0.2), 0.6);
-  ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, 150, gy, X(80), gy, tw(t, s(0.4), s(1.2), E.ioC)); ctx.restore();
-  for (let c = 0; c <= 80; c += 10) { txt(ctx, String(c), X(c), gy + 66, fM(500, 18), C.mute, 'center', tw(t, s(1), s(1.4))); }
-  txt(ctx, '水平距離 (cm)', X(80), gy + 100, fS(700, 20), C.mute, 'right', tw(t, s(1), s(1.4)));
+  const k = 11, x0 = 440, gy = 860, X = c => x0 + c * k, Y = h => gy - h * k, TR = 25 * k;
+  tireLine(ctx, X(0), gy - TR, TR, -t * 3, t, s(0.2), 0.6);
+  dim(ctx, X(-25), gy - 2 * TR - 30, X(25), gy - 2 * TR - 30, 'Ø 50 cm', tw(t, s(1), s(1.8), E.lin), C.mute, 0, fM(500, 20));
+  ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, 150, gy, X(82), gy, tw(t, s(0.4), s(1.2), E.ioC)); ctx.restore();
+  for (let c = 0; c <= 80; c += 10) txt(ctx, String(c), X(c), gy + 52, fM(500, 18), C.mute, 'center', tw(t, s(1), s(1.4)));
+  txt(ctx, '水平距離 (cm)', X(80) + 40, gy + 52, fS(700, 20), C.mute, 'left', tw(t, s(1), s(1.4)));
   // deposit density under the ground line
-  for (let c = 0; c <= 73; c += 1.5) { const d = Math.exp(-((c - 27) ** 2) / (2 * 9 ** 2)), p = tw(t, s(1.4) + c * 0.012, s(2) + c * 0.012); ctx.fillStyle = rgba(C.acc, 0.12 + 0.6 * d); ctx.fillRect(X(c), gy + 4, 17 * 1.5 - 3, 10 + 26 * d * p); }
-  // envelope (dashed where it is only schematic)
-  const data = [[0, 0], [12, 8.5], [30, 14], [35, 10], [40, 8], [45, 6], [50, 5], [55, 4.5], [60, 4], [65, 2], [70, 0], [73, 0]], pts = [];
+  for (let c = 0; c <= 73; c += 1.5) { const d = Math.exp(-((c - 27) ** 2) / (2 * 9 ** 2)), p = tw(t, s(1.4) + c * 0.012, s(2) + c * 0.012); ctx.fillStyle = rgba(C.acc, 0.12 + 0.6 * d); ctx.fillRect(X(c), gy + 4, k * 1.5 - 3, 6 + 20 * d * p); }
+  // envelope: measured from 30 cm on (solid), schematic before that (dashed, kept under the tyre)
+  const data = [[0, 0], [10, 1.5], [18, 4.5], [25, 10], [30, 14], [35, 10], [40, 8], [45, 6], [50, 5], [55, 4.5], [60, 4], [65, 2], [70, 0], [73, 0]], pts = [];
   for (let i = 0; i < data.length - 1; i++) { const p0 = data[Math.max(0, i - 1)], p1 = data[i], p2 = data[i + 1], p3 = data[Math.min(data.length - 1, i + 2)];
-    for (let k = 0; k < 12; k++) { const u = k / 12, u2 = u * u, u3 = u2 * u, f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3); pts.push([f(p0[0], p1[0], p2[0], p3[0]), Math.max(0, f(p0[1], p1[1], p2[1], p3[1]))]); } }
+    for (let j = 0; j < 12; j++) { const u = j / 12, u2 = u * u, u3 = u2 * u, f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3); pts.push([f(p0[0], p1[0], p2[0], p3[0]), Math.max(0, f(p0[1], p1[1], p2[1], p3[1]))]); } }
+  const env = c => { for (let i = 1; i < pts.length; i++) if (pts[i][0] >= c) return lerp(pts[i - 1][1], pts[i][1], (c - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0] || 1)); return 0; };
   const ep = tw(t, s(1.6), s(3), E.ioC), pre = pts.filter(q => q[0] <= 30).map(q => [X(q[0]), Y(q[1])]), post = pts.filter(q => q[0] >= 30).map(q => [X(q[0]), Y(q[1])]);
   ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2.5; ctx.setLineDash([6, 8]); poly(ctx, pre, clamp(ep * 2)); ctx.setLineDash([]); poly(ctx, post, clamp(ep * 2 - 1)); ctx.restore();
-  for (let i = 0; i < 90; i++) { const ts = s(1) + i * 0.04; if (ts > t) break; const a = t - ts, life = 1.2 + hash(i) * 0.6; if (a > life) continue; const c = a / life * (15 + hash(i * 3.3) * 55), h = Math.max(0, (c < 30 ? c / 30 * 13 : 14 - (c - 30) * 0.33) * hash(i * 5.7));
-    ctx.fillStyle = rgba(C.acc, 0.8 * (1 - a / life)); ctx.beginPath(); ctx.arc(X(c), Y(h), 2.2, 0, TAU); ctx.fill(); }
-  // device placed at 25 cm
-  { const p = tw(t, s(3.4), s(4)), x = X(25); ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(x - 14, gy - 150, 28, 150); ctx.strokeStyle = C.acc; for (let k = 0; k < 3; k++) seg(ctx, x - 7 + k * 7, gy - 136, x - 7 + k * 7, gy - 14, 1); ctx.restore();
-    txt(ctx, '裝置位置 25 cm', x, gy - 170, fS(900, 24), C.ink, 'center', p); }
-  dim(ctx, X(0), gy + 140, X(73), gy + 140, '擴散範圍 0–73 cm', tw(t, s(2.6), s(3.4), E.lin), C.acc, 0, fS(700, 24));
+  { const p = tw(t, s(3), s(3.5)); ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.mute; ctx.lineWidth = 1; ctx.setLineDash([3, 5]); seg(ctx, X(30), Y(14), X(30), gy); ctx.restore();
+    txt(ctx, '最高 14 cm', X(30) + 12, Y(14) - 10, fS(900, 22), C.acc, 'left', p); }
+  // device at 25 cm, 17 cm tall, standing beside the contact patch; the dust path runs through it
+  const dx0 = X(25), dw = 5 * k, dh = 17.3 * k, dp = tw(t, s(1.2), s(1.8));
+  ctx.save(); ctx.globalAlpha = dp; ctx.fillStyle = rgba(C.bg, 0.6); ctx.fillRect(dx0, gy - dh, dw, dh); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(dx0, gy - dh, dw, dh);
+  ctx.strokeStyle = C.acc; ctx.lineWidth = 1.6; for (let j = 0; j < 3; j++) seg(ctx, dx0 + 14 + j * 14, gy - dh + 14, dx0 + 14 + j * 14, gy - 12, 1); ctx.restore();
+  txt(ctx, '裝置位置 25 cm', dx0 + dw + 14, gy - 22, fS(900, 24), C.ink, 'left', dp);
+  // dust off the contact patch; some of it is caught at the device face
+  for (let i = 0; i < 110; i++) { const ts = s(1) + i * 0.035; if (ts > t) break; const a = t - ts, reach = 15 + hash(i * 3.3) * 58, life = 0.9 + reach / 60, hf = 0.25 + 0.75 * hash(i * 5.7);
+    const caught = reach > 25 && hash(i * 9.1) < 0.3, u = a / life; let c = u * reach; if (caught && c >= 25) c = 25;
+    if (u > 1 && !caught) continue; if (caught && a > 25 / reach * life + 1.2) continue;
+    const h = env(c) * hf, fade = caught && c >= 25 ? 0.9 : 0.85 * (1 - u);
+    ctx.fillStyle = rgba(caught && c >= 25 ? C.acc2 : C.acc, fade); ctx.beginPath(); ctx.arc(caught && c >= 25 ? dx0 + 3 : X(c), Y(h), 2.4, 0, TAU); ctx.fill(); }
+  dim(ctx, X(0), gy + 100, X(73), gy + 100, '擴散範圍 0–73 cm', tw(t, s(2.6), s(3.4), E.lin), C.acc, 0, fS(700, 24));
   // right column
   const rx = 1180;
   reveal(ctx, '27 cm 處沉積最多', rx, 400, { t, t0: s(2.6), font: fS(900, 40), size: 40, color: C.acc, stagger: 0.03 });
