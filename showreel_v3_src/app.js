@@ -304,10 +304,13 @@ function sPhysics(ctx, t) {
   ctx.fillStyle = C.acc; ctx.beginPath(); ctx.arc(152, 858, 7, 0, TAU); ctx.fill(); txt(ctx, '導電性微粒（含碳黑）→ 被吸附', 174, 868, fS(700, 26), C.ink2);
   ctx.strokeStyle = C.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(652, 858, 8, 0, TAU); ctx.stroke(); txt(ctx, '礦物顆粒 → 多半穿越', 674, 868, fS(700, 26), C.mute); ctx.restore();
   const ex = 1290;
-  reveal(ctx, 'F = qE', ex, 440, { t, t0: s(29.5), font: fM(500, 64), size: 64, stagger: 0.05 }); txt(ctx, '(1) 庫侖力', ex + 280, 432, fS(700, 22), C.mute, 'left', tw(t, s(29.9), s(30.5)));
-  reveal(ctx, 'E = V / d', ex, 552, { t, t0: s(30.5), font: fM(500, 64), size: 64, stagger: 0.05 }); txt(ctx, '(2) 平行板電場', ex + 330, 544, fS(700, 22), C.mute, 'left', tw(t, s(30.9), s(31.5)));
-  ctx.save(); ctx.strokeStyle = C.dim; ctx.lineWidth = 1; seg(ctx, ex, 604, ex + 470, 604, tw(t, s(31.3), s(32), E.ioC)); ctx.restore();
-  brackets(ctx, ex - 28, 630, 510, 136, 26, tw(t, s(32.3), s(33.2)), C.acc, 2);
+  // widths are measured so the notes and the bracket never collide with the formulas, whatever font metrics we get
+  const mw = (str, font) => { ctx.save(); ctx.font = font; const w = [...str].reduce((a, c) => a + ctx.measureText(c).width, 0); ctx.restore(); return w; };
+  const w1 = mw('E = V / d', fM(500, 64)), w3 = mw('F = qV / d', fM(600, 88));
+  reveal(ctx, 'F = qE', ex, 440, { t, t0: s(29.5), font: fM(500, 64), size: 64, stagger: 0.05 }); txt(ctx, '(1) 庫侖力', ex + w1 + 36, 432, fS(700, 22), C.mute, 'left', tw(t, s(29.9), s(30.5)));
+  reveal(ctx, 'E = V / d', ex, 552, { t, t0: s(30.5), font: fM(500, 64), size: 64, stagger: 0.05 }); txt(ctx, '(2) 平行板電場', ex + w1 + 36, 544, fS(700, 22), C.mute, 'left', tw(t, s(30.9), s(31.5)));
+  ctx.save(); ctx.strokeStyle = C.dim; ctx.lineWidth = 1; seg(ctx, ex, 604, ex + Math.max(470, w3), 604, tw(t, s(31.3), s(32), E.ioC)); ctx.restore();
+  brackets(ctx, ex - 28, 630, w3 + 56, 136, 26, tw(t, s(32.3), s(33.2)), C.acc, 2);
   reveal(ctx, 'F = qV / d', ex, 728, { t, t0: s(31.8), font: fM(600, 88), size: 88, color: C.acc, stagger: 0.06, dur: 0.9 });
   reveal(ctx, '受力與電壓成正比、', ex, 830, { t, t0: s(33.3), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
   reveal(ctx, '與極板間距成反比', ex, 876, { t, t0: s(33.9), font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.03 });
@@ -723,17 +726,18 @@ function sMethod(ctx, t) {
   const cols = [['01', '靜態', '封閉導流平台', '吹塵球以定壓氣流送粉', '量測極板攔截與逃逸質量'], ['02', '動態', '輪轂馬達平台', '輪胎摩擦砂紙產生粉塵', '量測擴散範圍與捕捉質量'], ['03', '化學', '高解析質譜', 'Bruker micrOTOF II', '比對 6PPD 同位素分布']];
   cols.forEach(([n, h, a, b, c], i) => { const x = 140 + i * 560, y = 360, t0 = s(0.8) + i * B(0.7), p = tw(t, t0, t0 + 0.8, E.ioC);
     frame(ctx, x, y, 520, 360, p);
-    txt(ctx, n, x + 40, y + 74, fM(600, 44), C.acc, 'left', tw(t, t0 + 0.2, t0 + 0.6));
-    reveal(ctx, h, x + 130, y + 72, { t, t0: t0 + 0.2, font: fS(900, 44), size: 44, stagger: 0.05 });
+    const cx = x + 260;
+    txt(ctx, n, cx - 12, y + 74, fM(600, 44), C.acc, 'right', tw(t, t0 + 0.2, t0 + 0.6));
+    reveal(ctx, h, cx + 12, y + 72, { t, t0: t0 + 0.2, font: fS(900, 44), size: 44, stagger: 0.05 });
     // pictogram
-    const gx = x + 40, gy = y + 140, gp = tw(t, t0 + 0.3, t0 + 1, E.ioC); ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.6;
+    const gx = x + [135, 115, 100][i], gy = y + 140, gp = tw(t, t0 + 0.3, t0 + 1, E.ioC); ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.6;
     if (i === 0) { poly(ctx, [[gx, gy + 20], [gx + 200, gy + 20]], gp); poly(ctx, [[gx, gy + 60], [gx + 200, gy + 60]], gp); ctx.strokeStyle = C.acc; for (let k = 0; k < 3; k++) seg(ctx, gx + 250 + k * 18, gy + 10, gx + 250 + k * 18, gy + 70, gp); ctx.strokeStyle = C.ink2; arc(ctx, gx - 18, gy + 40, 18, 0, TAU, gp); }
     else if (i === 1) { arc(ctx, gx + 50, gy + 36, 40, 0, TAU, gp); arc(ctx, gx + 50, gy + 36, 12, 0, TAU, gp); seg(ctx, gx - 10, gy + 78, gx + 300, gy + 78, gp); hatch(ctx, gx, gy + 78, 120, 6, 5, rgba(C.ink, 0.4), gp); ctx.fillStyle = C.acc; for (let k = 0; k < 8; k++) { ctx.beginPath(); ctx.arc(gx + 110 + k * 22, gy + 64 - Math.sin(k / 8 * PI) * 30, 2.4, 0, TAU); ctx.globalAlpha = gp; ctx.fill(); } }
     else { seg(ctx, gx, gy + 78, gx + 320, gy + 78, gp); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; for (const [dx, h] of [[60, 70], [110, 18], [170, 8], [230, 4]]) seg(ctx, gx + dx, gy + 78, gx + dx, gy + 78 - h * gp, 1); }
     ctx.restore();
-    reveal(ctx, a, x + 40, y + 270, { t, t0: t0 + 0.4, font: fS(900, 30), size: 30, stagger: 0.03 });
-    txt(ctx, b, x + 40, y + 310, /[一-鿿]/.test(b) ? fS(700, 22) : fM(500, 20), C.ink2, 'left', tw(t, t0 + 0.6, t0 + 1.1));
-    txt(ctx, c, x + 40, y + 342, fS(700, 22), C.mute, 'left', tw(t, t0 + 0.7, t0 + 1.2)); });
+    reveal(ctx, a, cx, y + 270, { t, t0: t0 + 0.4, font: fS(900, 30), size: 30, stagger: 0.03, align: 'center' });
+    txt(ctx, b, cx, y + 310, /[一-鿿]/.test(b) ? fS(700, 22) : fM(500, 20), C.ink2, 'center', tw(t, t0 + 0.6, t0 + 1.1));
+    txt(ctx, c, cx, y + 342, fS(700, 22), C.mute, 'center', tw(t, t0 + 0.7, t0 + 1.2)); });
   bullet(ctx, 140, 820, tw(t, s(3.4), s(3.8)));
   reveal(ctx, '替代粉體：導電碳粉', 170, 820, { t, t0: s(3.5), font: fS(900, 32), size: 32, color: C.acc, stagger: 0.03 });
   reveal(ctx, '與 TRWP 同樣含有碳黑、導電特性相近；真實 TRWP 不易收集且可能具毒性', 170, 868, { t, t0: s(3.9), font: fS(700, 26), size: 26, color: C.ink2, stagger: 0.012 });
@@ -828,8 +832,8 @@ function sDynRes(ctx, t) {
 // 07 — next steps
 function sFuture(ctx, t) {
   heading(ctx, t, '07 — NEXT STEPS', '後續規劃');
-  const items = [['多轉速測試', '建立效率與等效車速的關係'], ['位置最佳化', '先掃水平距離、再掃垂直高度'], ['增加重複次數', '降低相對量測誤差'], ['絕緣粉體對照', '驗證對導電微粒的選擇性'], ['6PPD 標準品比對', '建立定量方法']];
-  const y = 560, x0 = 220, x1 = 1700, lp = tw(t, s(0.6), s(3), E.ioC);
+  const items = [['多轉速測試', '建立效率與等效車速的關係'], ['位置最佳化', '先掃水平距離、再掃垂直高度'], ['增加重複次數', '降低相對量測誤差'], ['不同電壓對照', '比較不同電壓下電場的影響'], ['6PPD 標準品比對', '建立定量方法']];
+  const y = 560, x0 = 330, x1 = 1590, lp = tw(t, s(0.6), s(3), E.ioC);
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 2; seg(ctx, x0, y, x1, y, lp); ctx.restore();
   items.forEach(([a, b], i) => { const x = lerp(x0, x1, i / (items.length - 1)), t0 = s(0.8) + i * B(0.5), p = spring(t - t0, 2.2, 0.55); if (p <= 0) return;
     ctx.save(); ctx.fillStyle = C.bg; ctx.strokeStyle = C.acc; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, 12 * Math.min(1.2, p), 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore();
