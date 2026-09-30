@@ -767,8 +767,8 @@ function sEnvelope(ctx, t) {
   const gy = 820, X = c => 330 + c * 17, Y = h => gy - h * 20;
   tireLine(ctx, X(0) - 10, gy - 150, 150, -t * 6, t, s(0.2), 0.6);
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, 150, gy, X(80), gy, tw(t, s(0.4), s(1.2), E.ioC)); ctx.restore();
-  for (let c = 0; c <= 80; c += 10) { txt(ctx, String(c), X(c), gy + 36, fM(500, 18), C.mute, 'center', tw(t, s(1), s(1.4))); }
-  txt(ctx, '水平距離 (cm)', X(80), gy + 72, fS(700, 20), C.mute, 'right', tw(t, s(1), s(1.4)));
+  for (let c = 0; c <= 80; c += 10) { txt(ctx, String(c), X(c), gy + 66, fM(500, 18), C.mute, 'center', tw(t, s(1), s(1.4))); }
+  txt(ctx, '水平距離 (cm)', X(80), gy + 100, fS(700, 20), C.mute, 'right', tw(t, s(1), s(1.4)));
   // deposit density under the ground line
   for (let c = 0; c <= 73; c += 1.5) { const d = Math.exp(-((c - 27) ** 2) / (2 * 9 ** 2)), p = tw(t, s(1.4) + c * 0.012, s(2) + c * 0.012); ctx.fillStyle = rgba(C.acc, 0.12 + 0.6 * d); ctx.fillRect(X(c), gy + 4, 17 * 1.5 - 3, 10 + 26 * d * p); }
   // envelope (dashed where it is only schematic)
@@ -782,7 +782,7 @@ function sEnvelope(ctx, t) {
   // device placed at 25 cm
   { const p = tw(t, s(3.4), s(4)), x = X(25); ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(x - 14, gy - 150, 28, 150); ctx.strokeStyle = C.acc; for (let k = 0; k < 3; k++) seg(ctx, x - 7 + k * 7, gy - 136, x - 7 + k * 7, gy - 14, 1); ctx.restore();
     txt(ctx, '裝置位置 25 cm', x, gy - 170, fS(900, 24), C.ink, 'center', p); }
-  dim(ctx, X(0), gy + 110, X(73), gy + 110, '擴散範圍 0–73 cm', tw(t, s(2.6), s(3.4), E.lin), C.acc, 0, fS(700, 24));
+  dim(ctx, X(0), gy + 140, X(73), gy + 140, '擴散範圍 0–73 cm', tw(t, s(2.6), s(3.4), E.lin), C.acc, 0, fS(700, 24));
   // right column
   const rx = 1180;
   reveal(ctx, '27 cm 處沉積最多', rx, 400, { t, t0: s(2.6), font: fS(900, 40), size: 40, color: C.acc, stagger: 0.03 });
