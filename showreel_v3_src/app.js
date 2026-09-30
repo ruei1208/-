@@ -836,7 +836,7 @@ function vehicle(ctx, kind, x, y, p, col) {
   ctx.restore();
 }
 function sApps(ctx, t) {
-  heading(ctx, t, '07 — APPLICATIONS', '應用方向：先從商用車隊開始');
+  heading(ctx, t, '07 — APPLICATIONS', '應用方向：優先以商用車隊驗證');
   { const p = tw(t, s(0.8), s(1.4)); frame(ctx, 1320, 130, 460, 96, p, C.acc); txt(ctx, 'Euro 7 · 2024', 1350, 170, fM(600, 24), C.acc, 'left', p, 2); txt(ctx, '首度將輪胎磨耗率納入車輛認證規範', 1350, 206, fS(700, 20), C.ink2, 'left', p); }
   const cols = [['bus', '公車、貨車', ['軸重高、行駛里程長', '車載電力與輪拱空間較寬裕', '車隊集中維護，便於清理集塵盒']], ['scooter', '機車', ['國內數量龐大', '輪胎更換頻率較高', '較新的輪胎含 6PPD 較多']], ['bike', '腳踏車', ['安裝方式最簡單', '需另外解決供電問題', '本專題即以電動腳踏車驅動輪驗證']]];
   cols.forEach(([k, h, ls], i) => { const x = 140 + i * 560, t0 = s(1) + i * B(0.8), p = tw(t, t0, t0 + 1, E.ioC), first = i === 0;
