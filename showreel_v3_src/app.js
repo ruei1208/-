@@ -620,7 +620,7 @@ function sEnd(ctx, t) {
 function sLNews(ctx, t) {
   const items = [
     ['2020 · 美國 西雅圖', '輪胎化學物質 6PPD-quinone 被證實造成城市溪流銀鮭大量死亡', 'KUOW Public Radio, 2020.12.04；Tian et al., Science, 2021'],
-    ['2022 · 中國 華南', '150 份尿液樣本中，60–100% 檢出 6PPD 或 6PPD-Q', 'Du et al., Environ. Sci. Technol. Lett., 2022'],
+    ['2022 · 中國 華南', '已在人體尿液中檢出 6PPD 與 6PPD-Q', 'Du et al., Environ. Sci. Technol. Lett., 2022'],
     ['2024 · 歐盟', 'Euro 7 首度將輪胎磨耗納入車輛排放法規', 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
     ['2026 · 台灣', '學者建議針對輪胎磨損等陸源排放，制定塑膠微粒減量政策', '中央通訊社, 2026.01.25'],
   ];
@@ -959,13 +959,9 @@ function sTSalmon(ctx, t) {
 
 function sTUrine(ctx, t) {
   dateCard(ctx, t, '2022', '中國　華南');
-  for (let i = 0; i < 150; i++) { const c = i % 25, r = Math.floor(i / 25), p = tw(t, s(0.6) + i * 0.012, s(0.9) + i * 0.012); if (p <= 0) continue;
-    ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(1080 + c * 26, 470 + r * 30, 7, 0, TAU); ctx.stroke(); ctx.restore(); }
-  txt(ctx, '150 份尿液樣本', 1080, 690, fS(700, 26), C.mute, 'left', tw(t, s(2.4), s(3)));
-  reveal(ctx, '60–100%', 260, 560, { t, t0: s(1.6), font: fM(600, 120), size: 120, color: C.acc, stagger: 0.04 });
-  reveal(ctx, '的樣本檢出 6PPD 或 6PPD-Q', 264, 640, { t, t0: s(2.2), font: fS(700, 36), size: 36, color: C.ink2, stagger: 0.025 });
-  txt(ctx, '受試者包含成人、兒童與孕婦', 264, 690, fS(700, 26), C.mute, 'left', tw(t, s(2.8), s(3.4)));
-  source(ctx, t, 'Du et al., Environ. Sci. Technol. Lett., 2022', s(3.4));
+  reveal(ctx, '已在人體尿液中檢出', 260, 540, { t, t0: s(0.8), font: fS(900, 84), size: 84, stagger: 0.05 });
+  reveal(ctx, '6PPD 與 6PPD-Q', 260, 650, { t, t0: s(1.6), font: fM(600, 72), size: 72, color: C.acc, stagger: 0.04 });
+  source(ctx, t, 'Du et al., Environ. Sci. Technol. Lett., 2022', s(2.6));
 }
 
 function sTEU(ctx, t) {
