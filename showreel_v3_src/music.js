@@ -116,7 +116,7 @@ export async function renderMusic() {
   // ---------- long-promo score: documentary pacing, no drums. Each chapter keeps its own chord loop (two bars per chord)
   // and piano density; chapter cards breathe with a single low note. Foley stays only where the picture shows it.
   function docScore() {
-    master.gain.value = 0.62;
+    master.gain.value = 1.1;   // about -16 LUFS, a little louder than the old long mix
     const C2 = {
       Dm9: [38, [50, 53, 57, 60, 64, 69]], Bbmaj7: [34, [50, 53, 57, 58, 62, 65]], Fmaj7: [41, [53, 57, 60, 64, 67, 72]],
       Csus: [36, [53, 55, 60, 62, 67, 72]], Am7: [45, [52, 57, 60, 64, 67, 71]], Gm9: [43, [53, 57, 58, 62, 65, 69]],
