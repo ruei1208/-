@@ -20,16 +20,22 @@ const SHORT = {
 };
 
 // long promo: every original scene at its authored pace plus the new chapters; new scenes run on their own clock from 0
-const LONG_LEN = [['intro', 8], ['problemA', 5], ['problemB', 5], ['ppd', 5], ['limits', 8], ['tyre', 6], ['approach', 8], ['physics', 10], ['charge', 8],
-  ['rig', 7], ['device', 16], ['build', 9], ['safety', 8], ['method', 9], ['stat', 6], ['imaging', 8], ['envelope', 8], ['dynres', 6], ['spec', 6],
-  ['future', 8], ['apps', 10], ['team', 8], ['end', 8]];
+// news opener, chapter cards between the big sections, and longer holds on the text-heavy pages
+const LONG_LEN = [['lnews', 12], ['intro', 8], ['problemA', 5], ['problemB', 5], ['ppd', 5],
+  ['ch2', 2], ['limits', 8], ['tyre', 6], ['approach', 8],
+  ['ch3', 2], ['physics', 10], ['charge', 8],
+  ['ch4', 2], ['rig', 7], ['device', 16], ['build', 9],
+  ['ch5', 2], ['safety', 8],
+  ['ch6', 2], ['method', 11], ['stat', 6], ['imaging', 8], ['envelope', 8], ['dynres', 6], ['spec', 6],
+  ['ch7', 2], ['future', 8], ['apps', 12], ['team', 10], ['end', 8]];
+export const CHAPTERS = { ch2: ['02', '現有方案與本專題'], ch3: ['03', '作動原理'], ch4: ['04', '系統與裝置'], ch5: ['05', '安全設計'], ch6: ['06', '實驗驗證'], ch7: ['07', '展望'] };
 const AUTHORED = { intro: 0, problemA: 8, problemB: 12, ppd: 15, limits: 18, physics: 26, rig: 36, device: 36, safety: 52, stat: 60, spec: 68, end: 76 };
 const LONG = (() => {
   const CUT = {}, CLOCK = {}; let b = 0;
   for (const [n, len] of LONG_LEN) { CUT[n] = b; CLOCK[n] = [[b, AUTHORED[n] ?? 0]]; b += len; }
   return {
     BEATS: b, ORDER: LONG_LEN.map(([n]) => n), CUT, CLOCK, RIG_HOLD: 3, LONG: true,
-    SEC: [['problemA', '01', 'THE PROBLEM'], ['limits', '02', 'OUR APPROACH'], ['physics', '03', 'HOW IT WORKS'], ['rig', '04', 'THE SYSTEM'], ['device', '04', 'THE DEVICE'],
+    SEC: [['lnews', '01', 'THE PROBLEM'], ['limits', '02', 'OUR APPROACH'], ['physics', '03', 'HOW IT WORKS'], ['rig', '04', 'THE SYSTEM'], ['device', '04', 'THE DEVICE'],
       ['build', '04', 'BUILD & VERIFY'], ['safety', '05', 'FAIL-SAFE'], ['method', '06', 'VALIDATION'], ['future', '07', 'OUTLOOK'], ['team', '07', 'TEAM']],
     TOTAL: '07',
   };

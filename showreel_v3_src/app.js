@@ -1,12 +1,13 @@
 import { SYNC, B, CUT, BEAT, BEATS, DUR, clock } from './music.js';
-import { EDIT } from './edit.js';
+import { EDIT, CHAPTERS } from './edit.js';
 import { loadDevice, setPose, render, project, partCenter, D3 } from './device3d.js';
 
 export const W = 1920, H = 1080, FPS = 60;
 export { DUR };
 const TAU = Math.PI * 2, PI = Math.PI;
 const C = { bg: '#0A0A0A', ink: '#F2F2F2', ink2: '#C8C8C8', mute: '#8A8A8A', dim: '#4A4A4A', line: '#262626', acc: '#FF8A00', acc2: '#FFB45C', red: '#FF3B2F' };
-const fS = (w, s) => `${w} ${s}px "Noto Serif TC",serif`;
+// the long cut is watched on phones and projectors: small serif text is set a few px larger there
+const fS = (w, s) => `${w} ${EDIT.LONG && s < 26 ? s + 4 : s}px "Noto Serif TC",serif`;
 const fM = (w, s) => `${w} ${s}px "IBM Plex Mono","Noto Sans TC",monospace`;
 // ------------------------------------------------------------ motion kit
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -616,6 +617,32 @@ function sEnd(ctx, t) {
   if (!EDIT.LONG) txt(ctx, '專題生 陳睿瑀 · 李恩 · 林子鈞', cx, 932, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.5, t0 + 2.05));
 }
 
+
+// ================================================================ long cut: news opener and chapter cards
+function sLNews(ctx, t) {
+  const items = [
+    ['2020 · 美國 西雅圖', '輪胎化學物質 6PPD-quinone 被證實造成城市溪流銀鮭大量死亡', 'KUOW Public Radio, 2020.12.04；Tian et al., Science, 2021'],
+    ['2022 · 中國 華南', '150 份尿液樣本中，60–100% 檢出 6PPD 或 6PPD-Q', 'Du et al., Environ. Sci. Technol. Lett., 2022'],
+    ['2024 · 歐盟', 'Euro 7 首度將輪胎磨耗納入車輛排放法規', 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
+    ['2026 · 台灣', '學者建議針對輪胎磨損等陸源排放，制定塑膠微粒減量政策', '中央通訊社, 2026.01.25'],
+  ];
+  kicker(ctx, 140, 170, '00 — IN THE NEWS', t, 0);
+  const slot = B(2.7);
+  items.forEach(([d, h, src], i) => { const t0 = 0.3 + i * slot, y = 330 + i * 150, p = tw(t, t0, t0 + 0.5, E.ioC);
+    ctx.save(); ctx.strokeStyle = i === Math.min(3, Math.floor((t - 0.3) / slot)) ? C.acc : C.dim; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50, p); ctx.restore();
+    txt(ctx, d, 170, y - 10, fM(500, 22), C.acc, 'left', p, 3);
+    reveal(ctx, h, 170, y + 36, { t, t0: t0 + 0.15, font: fS(900, 38), size: 38, stagger: 0.02 });
+    txt(ctx, '資料來源：' + src, 172, y + 76, fS(700, 20), C.mute, 'left', tw(t, t0 + 0.6, t0 + 1.1)); });
+}
+function sChapter(ctx, t, key) {
+  const [n, name] = CHAPTERS[key];
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const p = tw(t, 0.05, 0.5, E.outC);
+  txt(ctx, n, W / 2, 470, fM(600, 64), C.acc, 'center', p, 8);
+  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, W / 2 - 60 * p, 510, W / 2 + 60 * p, 510); ctx.restore();
+  reveal(ctx, name, W / 2, 600, { t, t0: 0.15, font: fS(900, 56), size: 56, align: 'center', stagger: 0.04 });
+}
+
 // ================================================================ long promo scenes (each on its own clock: t = seconds into the scene)
 function checkMark(ctx, x, y, sz, p, col = C.acc) { if (p <= 0) return; ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   poly(ctx, [[x - sz * 0.5, y], [x - sz * 0.12, y + sz * 0.38], [x + sz * 0.55, y - sz * 0.45]], p); ctx.restore(); }
@@ -874,7 +901,7 @@ function sApps(ctx, t) {
     vehicle(ctx, k, x + 260, 520, tw(t, t0 + 0.2, t0 + 1.2, E.ioC), first ? C.acc : C.ink2);
     reveal(ctx, h, x + 40, 680, { t, t0: t0 + 0.5, font: fS(900, 40), size: 40, stagger: 0.04 });
     ls.forEach((l, j) => { bullet(ctx, x + 40, 744 + j * 52, tw(t, t0 + 0.8 + j * 0.15, t0 + 1.1 + j * 0.15), C.mute); txt(ctx, l, x + 64, 744 + j * 52, fS(700, 24), C.ink2, 'left', tw(t, t0 + 0.8 + j * 0.15, t0 + 1.3 + j * 0.15)); }); });
-  cite(ctx, t, 'Regulation (EU) 2024/1257 (Euro 7)；California DTSC, 6PPD Product–Chemical Profile, 2021', s(2));
+  cite(ctx, t, 'Regulation (EU) 2024/1257 (Euro 7)；Sommer et al., 2018；De Oliveira et al., 2023；California DTSC, 6PPD Product–Chemical Profile, 2021', s(2));
 }
 
 // 07 — team
@@ -996,7 +1023,8 @@ function sTTitle(ctx, t) {
 }
 
 // ------------------------------------------------------------ transitions
-const CUTS = Object.values(CUT).filter(b => b > 0).map(b => B(b));
+const FADE = new Set(Object.keys(CHAPTERS).filter(k => k in CUT).flatMap(k => { const i = EDIT.ORDER.indexOf(k); return [B(CUT[k]), B(CUT[EDIT.ORDER[i + 1]])]; }));
+const CUTS = Object.values(CUT).filter(b => b > 0).map(b => B(b)).filter(c => !FADE.has(c));
 const HW = 0.3;
 const wipeX = (t, tc) => W * E.ioC(P(t, tc - HW, tc + HW));
 // run a scene on its own authored clock (see CLOCK in music.js)
@@ -1013,6 +1041,7 @@ const FN = { intro: sIntro, problemA: sProblemA, problemB: sProblemB, ppd: sPPD,
   envelope: sEnvelope, dynres: sDynRes, future: sFuture, apps: sApps, team: sTeam,
   tOpen: sTOpen, tNews1: sTNews1, tSalmon: sTSalmon, tUrine: sTUrine, tEU: sTEU, tTaiwan: sTTaiwan, tTurn: sTTurn, tMontage: sTMontage };
 if (EDIT.TRAILER) FN.end = sTTitle;
+FN.lnews = sLNews; for (const k of Object.keys(CHAPTERS)) FN[k] = (ctx, t) => sChapter(ctx, t, k);
 const SCENES = EDIT.ORDER.map((n, i) => [B(CUT[n]), i + 1 < EDIT.ORDER.length ? B(CUT[EDIT.ORDER[i + 1]]) : DUR + 0.3, on(n, FN[n])]);
 function scanLine(ctx, t) {
   for (const tc of CUTS) { if (t < tc - HW || t > tc + HW) continue; const x = wipeX(t, tc);
@@ -1047,11 +1076,13 @@ export function drawFrame(ctx, t) {
   if (EDIT.TRAILER) return drawTrailer(ctx, t);
   background(ctx, t);
   for (const [a, b, fn] of SCENES) {
-    const inStart = a === 0 ? -1 : a - HW, outEnd = b >= DUR ? 1e9 : b + HW; if (t < inStart || t > outEnd) continue;
-    const Lx = t > b - HW && b < DUR ? wipeX(t, b) : 0, Rx = t < a + HW && a > 0 ? wipeX(t, a) : W; if (Rx - Lx < 1) continue;
+    const fa = FADE.has(a), fb = FADE.has(b);
+    const inStart = a === 0 ? -1 : fa ? a : a - HW, outEnd = b >= DUR ? 1e9 : fb ? b : b + HW; if (t < inStart || t >= outEnd) continue;
+    const Lx = !fb && t > b - HW && b < DUR ? wipeX(t, b) : 0, Rx = !fa && t < a + HW && a > 0 ? wipeX(t, a) : W; if (Rx - Lx < 1) continue;
     ctx.save(); ctx.beginPath(); ctx.rect(Lx, 0, Rx - Lx, H); ctx.clip(); fn(ctx, t); ctx.restore();
   }
   scanLine(ctx, t); hud(ctx, t);
+  for (const c of FADE) { const d = Math.abs(t - c); if (d < 0.3) { ctx.fillStyle = `rgba(0,0,0,${1 - d / 0.3})`; ctx.fillRect(0, 0, W, H); } }
   if (t < 0.3) { ctx.fillStyle = `rgba(0,0,0,${1 - t / 0.3})`; ctx.fillRect(0, 0, W, H); }
   if (t > DUR - 0.5) { ctx.fillStyle = `rgba(0,0,0,${E.inC(P(t, DUR - 0.5, DUR))})`; ctx.fillRect(0, 0, W, H); }
 }

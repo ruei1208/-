@@ -25,11 +25,13 @@ const inR = (b, ...ranges) => ranges.some(([a, z]) => b >= a && b < z);
 
 function arrangement() {
   const kicks = [], rims = [], ticks = [];
+  // the long cut keeps a softer pulse: a kick on each bar, no rim or hi ticks
+  const D0 = EDIT.LONG ? CUT.problemA : 8;
   for (let b = 0; b < BEATS; b++) {
-    if (inR(b, [8, END]) && b % 2 === 0) kicks.push(B(b));
-    if (inR(b, [CUT.limits, END]) && b % 2 === 1) rims.push(B(b));
+    if (inR(b, [D0, END]) && b % (EDIT.LONG ? 4 : 2) === 0) kicks.push(B(b));
+    if (!EDIT.LONG && inR(b, [CUT.limits, END]) && b % 2 === 1) rims.push(B(b));
   }
-  for (let e = 0; e < BEATS * 2; e++) { const b = e / 2; if (inR(b, [8, END])) ticks.push(B(b)); }
+  if (!EDIT.LONG) for (let e = 0; e < BEATS * 2; e++) { const b = e / 2; if (inR(b, [8, END])) ticks.push(B(b)); }
   kicks.push(B(END));
   return { kicks, rims, ticks };
 }
@@ -48,7 +50,7 @@ export async function renderMusic() {
   const out = ctx.createGain(); out.gain.setValueAtTime(0, 0); out.gain.linearRampToValueAtTime(1, 0.3); out.gain.setValueAtTime(1, DUR - 1.2); out.gain.linearRampToValueAtTime(0, DUR);
   const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 2; lim.ratio.value = 12; lim.attack.value = 0.002; lim.release.value = 0.12;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.knee.value = 12; comp.ratio.value = 1.8; comp.attack.value = 0.02; comp.release.value = 0.3;
-  const master = ctx.createGain(); master.gain.value = 0.75;
+  const master = ctx.createGain(); master.gain.value = EDIT.LONG ? 0.6 : 0.75;
   for (const nd of [master, comp, lim, out]) { nd.channelCountMode = 'explicit'; nd.channelCount = 2; }
   master.connect(comp); comp.connect(lim); lim.connect(out); out.connect(ctx.destination);
   const rev = ctx.createConvolver(); rev.buffer = ir; const revRet = ctx.createGain(); revRet.gain.value = 0.45; rev.connect(revRet); revRet.connect(master);
@@ -168,10 +170,10 @@ export async function renderMusic() {
     for (const h of [0, 1]) { const i = k * 2 + h; piano(B(b + h / 2), c.v[seq[i]] + 12, h ? 0.32 : 0.46, 2.0, (seq[i] - 2) * 0.12); }
     if (inR(b, [CUT.stat, END])) piano(B(b), c.v[[4, 3, 4, 2][k]] + 24, 0.28, 2.4, 0.25);
   }
-  SYNC.kicks.forEach(t => kick(t, t >= B(END) ? 0.8 : 1));
+  SYNC.kicks.forEach(t => kick(t, t >= B(END) ? 0.8 : EDIT.LONG ? 0.6 : 1));
   SYNC.rims.forEach(t => rim(t, 0.8));
   SYNC.ticks.forEach((t, i) => tick(t, i % 2 ? 0.45 : 0.7));
-  for (let e = 0; e < BEATS * 4; e++) { const b = e / 4; if (inR(b, [CUT.physics, END])) shaker(B(b), e % 2 ? 0.6 : 1); }
+  if (!EDIT.LONG) for (let e = 0; e < BEATS * 4; e++) { const b = e / 4; if (inR(b, [CUT.physics, END])) shaker(B(b), e % 2 ? 0.6 : 1); }
   [[0.05, 1.4], [B(CUT.limits), 0.6], [B(CUT.physics), 0.8], [B(CUT.rig), 1.2], [B(CUT.device), 1.6], [B(CUT.safety), 0.8], [B(CUT.end), 1.0]].forEach(([t, d]) => pencil(t, d));
   Object.values(CUT).filter(b => b > 0).forEach(b => airWhoosh(B(b), 0.9));
   // device (authored beats, placed through its clock): plates land, cartridge + dust box click in, scan shimmer, pull-out
