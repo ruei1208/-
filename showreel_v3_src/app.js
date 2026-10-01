@@ -161,7 +161,6 @@ function sIntro(ctx, t) {
   reveal(ctx, '車輛排放', tx, 600, { t, t0: s(4), font: fS(900, 104), size: 104, stagger: 0.08, dur: 1.0 });
   reveal(ctx, '不只來自排氣管', tx, 730, { t, t0: s(5), font: fS(900, 104), size: 104, color: C.acc, stagger: 0.07, dur: 1.0 });
   ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, tx, 780, tx + 800, 780, tw(t, s(6.2), s(7.2), E.ioC));
-  cite(ctx, t, 'Sommer et al., Aerosol Air Qual. Res., 2018；De Oliveira et al., J. Hazard. Mater., 2023', s(5.5));
   txt(ctx, 'NON-EXHAUST EMISSIONS', tx + 800, 820, fM(500, 20), C.mute, 'right', tw(t, s(6.5), s(7.2)), 3);
 }
 
@@ -271,7 +270,6 @@ function sLimits(ctx, t) {
   // bridge
   if (!EDIT.LONG) { ctx.save(); ctx.fillStyle = C.acc; ctx.fillRect(140, 918, 18 * tw(t, s(24.2), s(24.7)), 18); ctx.restore(); }
   if (!EDIT.LONG) reveal(ctx, '本專題 → 無濾網的主動式靜電捕捉', 176, 936, { t, t0: s(24.3), font: fS(900, 34), size: 34, color: C.acc, stagger: 0.03 });
-  cite(ctx, t, 'DEFRA, Review of PM2.5 Reduction Technologies for On-road Transport, 2025；POLIS Network, 2023', s(20.5));
 }
 function lerpHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const r = lerp(pa >> 16, pb >> 16, t), g = lerp(pa >> 8 & 255, pb >> 8 & 255, t), bb = lerp(pa & 255, pb & 255, t); return '#' + [r, g, bb].map(v => Math.round(v).toString(16).padStart(2, '0')).join(''); }
 
@@ -702,7 +700,6 @@ function sApproach(ctx, t) {
     ctx.save(); ctx.globalAlpha = clamp(p * 1.5); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; ctx.strokeRect(x, y, 64, 64); ctx.restore();
     txt(ctx, 'SDG', x + 32, y + 24, fM(600, 14), C.acc, 'center', clamp(p * 1.5), 2); txt(ctx, n, x + 32, y + 54, fM(600, 28), C.ink, 'center', clamp(p * 1.5));
     txt(ctx, l, x + 84, y + 42, fS(700, 26), C.ink2, 'left', clamp(p * 1.5)); });
-  cite(ctx, t, 'United Nations, Transforming Our World: The 2030 Agenda for Sustainable Development, 2015', s(4.6));
 }
 
 // 03 — which particles get caught
@@ -901,7 +898,6 @@ function sApps(ctx, t) {
     vehicle(ctx, k, x + 260, 520, tw(t, t0 + 0.2, t0 + 1.2, E.ioC), first ? C.acc : C.ink2);
     reveal(ctx, h, x + 40, 680, { t, t0: t0 + 0.5, font: fS(900, 40), size: 40, stagger: 0.04 });
     ls.forEach((l, j) => { bullet(ctx, x + 40, 744 + j * 52, tw(t, t0 + 0.8 + j * 0.15, t0 + 1.1 + j * 0.15), C.mute); txt(ctx, l, x + 64, 744 + j * 52, fS(700, 24), C.ink2, 'left', tw(t, t0 + 0.8 + j * 0.15, t0 + 1.3 + j * 0.15)); }); });
-  cite(ctx, t, 'Regulation (EU) 2024/1257 (Euro 7)；Sommer et al., 2018；De Oliveira et al., 2023；California DTSC, 6PPD Product–Chemical Profile, 2021', s(2));
 }
 
 // 07 — team
