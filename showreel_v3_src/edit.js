@@ -35,5 +35,15 @@ const LONG = (() => {
   };
 })();
 
-export const EDIT = q.get('edit') === 'long' ? LONG : SHORT;
-export const EDIT_NAME = q.get('edit') === 'long' ? 'long' : 'short';
+// trailer: news-led cold open, a turn, a montage of the device and results, then the title card. Every shot runs on its
+// own clock from 0; cuts dip through black instead of the showreel's scan wipe.
+const TRAILER_LEN = [['tOpen', 10], ['tNews1', 11], ['tSalmon', 8], ['tUrine', 8], ['tEU', 8], ['tTaiwan', 9], ['tTurn', 6], ['tMontage', 20], ['end', 12]];
+const TRAILER = (() => {
+  const CUT = {}, CLOCK = {}; let b = 0;
+  for (const [n, len] of TRAILER_LEN) { CUT[n] = b; CLOCK[n] = [[b, 0]]; b += len; }
+  return { BEATS: b, ORDER: TRAILER_LEN.map(([n]) => n), CUT, CLOCK, RIG_HOLD: 0, TRAILER: true, SEC: [], TOTAL: '' };
+})();
+
+const NAME = ['long', 'trailer'].includes(q.get('edit')) ? q.get('edit') : 'short';
+export const EDIT = { short: SHORT, long: LONG, trailer: TRAILER }[NAME];
+export const EDIT_NAME = NAME;
