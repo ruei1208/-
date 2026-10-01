@@ -230,9 +230,12 @@ function sPPD(ctx, t) {                          // beats 15-18
   reveal(ctx, '6PPD', 1100, 420, { t, t0: s(15.3), font: fS(900, 110), size: 110, stagger: 0.06, dur: 1 });
   txt(ctx, 'C₁₈H₂₄N₂ · 輪胎防老劑', 1106, 480, fM(500, 26), C.ink2, 'left', tw(t, s(15.6), s(16.2)));
   reveal(ctx, '氧化成 6PPD-Q', 1100, 610, { t, t0: s(16), font: fS(900, 48), size: 48, color: C.red, dur: 0.9 });
-  reveal(ctx, '對水生生物具急性毒性，', 1100, 680, { t, t0: s(16.5), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
-  reveal(ctx, '已於人體尿液中檢出。', 1100, 732, { t, t0: s(17), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
-  cite(ctx, t, 'Tian et al., Science, 2021；Du et al., Environ. Sci. Technol. Lett., 2022', s(16.5));
+  // the long cut already reports the toxicity and the urine finding in its news opener, so here it only says what 6PPD is
+  const [l1, l2, src] = EDIT.LONG ? ['添加於輪胎橡膠中延長壽命，', '並隨輪胎磨損微粒一同釋出。', 'Tian et al., Science, 2021']
+    : ['對水生生物具急性毒性，', '已於人體尿液中檢出。', 'Tian et al., Science, 2021；Du et al., Environ. Sci. Technol. Lett., 2022'];
+  reveal(ctx, l1, 1100, 680, { t, t0: s(16.5), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
+  reveal(ctx, l2, 1100, 732, { t, t0: s(17), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
+  cite(ctx, t, src, s(16.5));
 }
 
 // ================================================================ 2 current solutions (beats 18-26)
@@ -624,7 +627,7 @@ function sLNews(ctx, t) {
     ['2024 · 歐盟', 'Euro 7 首度將輪胎磨耗納入車輛排放法規', 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
     ['2026 · 台灣', '學者建議針對輪胎磨損等陸源排放，制定塑膠微粒減量政策', '中央通訊社, 2026.01.25'],
   ];
-  kicker(ctx, 140, 170, '00 — IN THE NEWS', t, 0);
+  kicker(ctx, 140, 170, '01 — IN THE NEWS', t, 0);
   const slot = B(2.7);
   items.forEach(([d, h, src], i) => { const t0 = 0.3 + i * slot, y = 330 + i * 150, p = tw(t, t0, t0 + 0.5, E.ioC);
     ctx.save(); ctx.strokeStyle = i === Math.min(3, Math.floor((t - 0.3) / slot)) ? C.acc : C.dim; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50, p); ctx.restore();

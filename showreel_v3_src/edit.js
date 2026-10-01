@@ -21,7 +21,7 @@ const SHORT = {
 
 // long promo: every original scene at its authored pace plus the new chapters; new scenes run on their own clock from 0
 // news opener, chapter cards between the big sections, and longer holds on the text-heavy pages
-const LONG_LEN = [['lnews', 12], ['intro', 8], ['problemA', 5], ['problemB', 5], ['ppd', 5],
+const LONG_LEN = [['intro', 8], ['lnews', 12], ['problemA', 5], ['problemB', 5], ['ppd', 5],
   ['ch2', 2], ['limits', 8], ['tyre', 6], ['approach', 8],
   ['ch3', 2], ['physics', 10], ['charge', 8],
   ['ch4', 2], ['rig', 7], ['device', 16], ['build', 9],
@@ -35,7 +35,7 @@ const LONG = (() => {
   for (const [n, len] of LONG_LEN) { CUT[n] = b; CLOCK[n] = [[b, AUTHORED[n] ?? 0]]; b += len; }
   return {
     BEATS: b, ORDER: LONG_LEN.map(([n]) => n), CUT, CLOCK, RIG_HOLD: 3, LONG: true,
-    SEC: [['lnews', '01', 'THE PROBLEM'], ['limits', '02', 'OUR APPROACH'], ['physics', '03', 'HOW IT WORKS'], ['rig', '04', 'THE SYSTEM'], ['device', '04', 'THE DEVICE'],
+    SEC: [['intro', '01', 'THE PROBLEM'], ['limits', '02', 'OUR APPROACH'], ['physics', '03', 'HOW IT WORKS'], ['rig', '04', 'THE SYSTEM'], ['device', '04', 'THE DEVICE'],
       ['build', '04', 'BUILD & VERIFY'], ['safety', '05', 'FAIL-SAFE'], ['method', '06', 'VALIDATION'], ['future', '07', 'OUTLOOK'], ['team', '07', 'TEAM']],
     TOTAL: '07',
   };
