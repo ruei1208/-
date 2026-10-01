@@ -111,6 +111,75 @@ export async function renderMusic() {
   function bell(t, m, v = 1) { for (const [h, a, d] of [[1, 1, 3.5], [2.76, 0.35, 1.6], [5.4, 0.12, 0.8]]) { const o = ctx.createOscillator(); o.frequency.value = mtof(m) * h; const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.035 * v * a, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(pianoBus); o.start(t); o.stop(t + d + 0.05); } }
 
   if (EDIT.TRAILER) { trailerScore(); return await ctx.startRendering(); }
+  if (EDIT.LONG) { docScore(); return await ctx.startRendering(); }
+
+  // ---------- long-promo score: documentary pacing, no drums. Each chapter keeps its own chord loop (two bars per chord)
+  // and piano density; chapter cards breathe with a single low note. Foley stays only where the picture shows it.
+  function docScore() {
+    master.gain.value = 0.62;
+    const C2 = {
+      Dm9: [38, [50, 53, 57, 60, 64, 69]], Bbmaj7: [34, [50, 53, 57, 58, 62, 65]], Fmaj7: [41, [53, 57, 60, 64, 67, 72]],
+      Csus: [36, [53, 55, 60, 62, 67, 72]], Am7: [45, [52, 57, 60, 64, 67, 71]], Gm9: [43, [53, 57, 58, 62, 65, 69]],
+    };
+    const LOW = ['Dm9', 'Bbmaj7', 'Fmaj7', 'Csus'], MAIN = ['Fmaj7', 'Am7', 'Bbmaj7', 'Csus'], BRIGHT = ['Bbmaj7', 'Fmaj7', 'Gm9', 'Csus'];
+    // piano figures over two bars: [beat, voice, velocity]
+    const PAT = {
+      single: [[0, 3, 0.4], [4, 4, 0.32]],
+      sparse: [[0, 2, 0.42], [3, 4, 0.32], [6, 3, 0.36]],
+      flow: [0, 2, 4, 3, 1, 3, 4, 2].map((v, b) => [b, v, b % 4 ? 0.3 : 0.42]),
+      move: [0, 2, 4, 3, 1, 3, 4, 2, 0, 2, 5, 3, 1, 4, 3, 2].map((v, i) => [i / 2, v, i % 2 ? 0.2 : i % 8 ? 0.3 : 0.4]),
+    };
+    const MEL = { Bbmaj7: [[0, 74], [3, 72], [4, 69]], Fmaj7: [[0, 72], [3, 69], [4, 67]], Gm9: [[0, 70], [3, 69], [4, 65]], Csus: [[0, 67], [2, 65], [4, 67]] };
+    const T = n => B(CUT[n]);
+    // [from, to, chords, figure, sub, card at start, melody, high answer]
+    const G = [
+      [0, CUT.lnews, LOW, 'single', false, false],
+      [CUT.lnews, CUT.ch2, LOW, 'sparse', true, false],
+      [CUT.ch2, CUT.ch4, MAIN, 'flow', true, true],
+      [CUT.ch4, CUT.ch5, MAIN, 'move', true, true],
+      [CUT.ch5, CUT.ch6, LOW, 'sparse', true, true],
+      [CUT.ch6, CUT.ch7, MAIN, 'flow', true, true, false, CUT.stat],
+      [CUT.ch7, CUT.end, BRIGHT, 'flow', true, true, true],
+    ];
+    const padBus = filt('lowpass', 1400, 0.5), padG = ctx.createGain(); padG.gain.value = 1; padBus.connect(padG); padG.connect(master); send(padG, rev, 0.7);
+    const warmPad = (t, notes, dur, lvl) => {
+      for (const m of notes) for (const [type, det, pan, a] of [['triangle', -5, -0.4, 0.016], ['triangle', 5, 0.4, 0.016], ['sine', 0, 0, 0.02]]) {
+        const o = ctx.createOscillator(); o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
+        const g = ctx.createGain(), A = a * lvl; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(A, t + 1.6); g.gain.setValueAtTime(A, t + dur); g.gain.linearRampToValueAtTime(0, t + dur + 1.8);
+        const p = ctx.createStereoPanner(); p.pan.value = pan; o.connect(g); g.connect(p); p.connect(padBus); o.start(t); o.stop(t + dur + 1.9);
+      }
+    };
+    const softSub = (t, m, dur) => { const o = ctx.createOscillator(); o.frequency.value = mtof(m); const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.05, t + 1.2); g.gain.setValueAtTime(0.05, t + Math.max(1.2, dur - 0.6)); g.gain.linearRampToValueAtTime(0, t + dur + 0.6); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.7); };
+    for (const [g0, g1, prog, fig, useSub, card, mel, hi] of G) {
+      const p0 = card ? g0 + 2 : g0;
+      if (card) { piano(B(g0), 38, 0.4, 4.5, 0); piano(B(g0) + 0.02, 50, 0.25, 4.5, 0); airWhoosh(B(g0), 0.45); }
+      // two bars per chord; a short remainder at the end of a chapter stretches the last chord instead of a stub
+      for (let c0 = g0, k = 0; c0 < g1; c0 += 8, k++) {
+        if (k && g1 - c0 < 4) break;
+        const [r, v] = C2[prog[k % prog.length]], len = g1 - c0 < 12 ? g1 - c0 : 8;
+        warmPad(B(c0), v.slice(0, 4), B(len), g0 === 0 ? 0.6 : 1);
+        if (useSub && c0 >= p0) softSub(B(c0), r + 12, B(len));
+        if (c0 + 8 < g1 || g1 === END) piano(B(Math.max(c0, p0)), r + 24, 0.3, 4.5, 0);
+        for (const [b, vi, vel] of PAT[fig]) {
+          const tb = c0 + b; if (tb < p0 || tb >= g1 - 0.5) continue;
+          piano(B(tb), v[vi] + 12, vel, fig === 'move' ? 2.2 : 3.4, (vi - 2.5) * 0.12);
+        }
+        if (hi !== undefined && hi && c0 >= hi) for (const [b, vi] of [[2, 5], [6, 4]]) if (c0 + b < g1 - 0.5) piano(B(c0 + b), v[vi] + 24, 0.18, 3, 0.3);
+        if (mel && c0 >= p0) for (const [b, m] of MEL[prog[k % prog.length]]) if (c0 + b < g1 - 0.5) piano(B(c0 + b), m, 0.4, 4, 0.1);
+      }
+    }
+    // device foley, placed through its clock and kept under the music
+    const dv = b => B(at('device', b)), sf = b => B(at('safety', b));
+    [38.5, 39, 39.5, 40].forEach(b => thud(dv(b), 0.5));
+    slide(dv(40.75), dv(41.5)); click(dv(41.5), 0.6); slide(dv(41.8), dv(42.5)); click(dv(42.5), 0.55);
+    slide(dv(48), dv(49)); slide(dv(50), dv(51)); click(dv(51), 0.5);
+    click(sf(56), 0.6);
+    // finale: open Fmaj9 that rings out under the title
+    const e = B(END);
+    warmPad(e, [53, 57, 60, 64, 67], DUR - e - 2, 1.1); softSub(e, 41, DUR - e - 2);
+    [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(e + i * 0.06, m, 0.45, 5, (i - 4) * 0.08));
+    bell(e + B(2), 76, 0.6); bell(e + B(3), 79, 0.4);
+  }
 
   // ---------- trailer score: rain and a low drone under the news, a riser into silence at the turn,
   // a hit on 輪胎, a driving montage, and one last hit under the title
