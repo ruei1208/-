@@ -621,19 +621,32 @@ function sEnd(ctx, t) {
 
 // ================================================================ long cut: news opener and chapter cards
 function sLNews(ctx, t) {
+  // each report gets the full frame for a few seconds, then all four settle into one list
   const items = [
-    ['2020 · 美國 西雅圖', '輪胎化學物質 6PPD-quinone 被證實造成城市溪流銀鮭大量死亡', 'KUOW Public Radio, 2020.12.04；Tian et al., Science, 2021'],
-    ['2022 · 中國 華南', '已在人體尿液中檢出 6PPD 與 6PPD-Q', 'Du et al., Environ. Sci. Technol. Lett., 2022'],
-    ['2024 · 歐盟', 'Euro 7 首度將輪胎磨耗納入車輛排放法規', 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
-    ['2026 · 台灣', '學者建議針對輪胎磨損等陸源排放，制定塑膠微粒減量政策', '中央通訊社, 2026.01.25'],
+    ['2020 · 美國 西雅圖', ['輪胎化學物質 6PPD-quinone', '被證實造成城市溪流銀鮭大量死亡'], 'KUOW Public Radio, 2020.12.04；Tian et al., Science, 2021'],
+    ['2022 · 中國 華南', ['已在人體尿液中檢出', '6PPD 與 6PPD-Q'], 'Du et al., Environ. Sci. Technol. Lett., 2022'],
+    ['2024 · 歐盟', ['Euro 7 首度將輪胎磨耗', '納入車輛排放法規'], 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
+    ['2026 · 台灣', ['學者建議針對輪胎磨損等陸源排放', '制定塑膠微粒減量政策'], '中央通訊社, 2026.01.25'],
   ];
   kicker(ctx, 140, 170, '01 — IN THE NEWS', t, 0);
-  const slot = B(2.7);
-  items.forEach(([d, h, src], i) => { const t0 = 0.3 + i * slot, y = 330 + i * 150, p = tw(t, t0, t0 + 0.5, E.ioC);
-    ctx.save(); ctx.strokeStyle = i === Math.min(3, Math.floor((t - 0.3) / slot)) ? C.acc : C.dim; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50, p); ctx.restore();
+  const ONE = 3, LIST = items.length * ONE;
+  if (t < LIST) {
+    const i = Math.floor(t / ONE), u = t - i * ONE, out = 1 - tw(u, ONE - 0.35, ONE), [d, h, src] = items[i];
+    txt(ctx, `${i + 1} / ${items.length}`, W - 140, 170, fM(500, 22), C.mute, 'right', out, 3);
+    txt(ctx, d, 140, 420, fM(500, 30), C.acc, 'left', tw(u, 0.05, 0.4) * out, 4);
+    ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; seg(ctx, 140, 450, 140 + 120 * tw(u, 0.1, 0.6, E.ioC), 450); ctx.restore();
+    h.forEach((l, j) => reveal(ctx, l, 140, 560 + j * 96, { t: u, t0: 0.2 + j * 0.35, font: fS(900, 72), size: 72, color: j ? C.acc : C.ink, stagger: 0.025, alpha: out }));
+    txt(ctx, '資料來源：' + src, 142, 800, fS(700, 22), C.mute, 'left', tw(u, 0.9, 1.4) * out);
+    return;
+  }
+  const u = t - LIST;
+  items.forEach(([d, h, src], i) => { const t0 = i * 0.12, p = tw(u, t0, t0 + 0.5, E.outC), y = 330 + i * 150 + (1 - p) * 30;
+    ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50); ctx.restore();
     txt(ctx, d, 170, y - 10, fM(500, 22), C.acc, 'left', p, 3);
-    reveal(ctx, h, 170, y + 36, { t, t0: t0 + 0.15, font: fS(900, 38), size: 38, stagger: 0.02 });
-    txt(ctx, '資料來源：' + src, 172, y + 76, fS(700, 20), C.mute, 'left', tw(t, t0 + 0.6, t0 + 1.1)); });
+    txt(ctx, h[0] + ([' ', ' ', '', '，'][i]) + h[1], 170, y + 36, fS(900, 38), C.ink, 'left', p);   // re-join the two card lines as one sentence
+    txt(ctx, '資料來源：' + src, 172, y + 76, fS(700, 20), C.mute, 'left', p); });
+  bullet(ctx, 140, 940, tw(u, 0.7, 1.1));
+  reveal(ctx, '這些報導，都與輪胎磨損微粒有關', 170, 940, { t: u, t0: 0.8, font: fS(900, 34), size: 34, color: C.acc, stagger: 0.025 });
 }
 function sChapter(ctx, t, key) {
   const [n, name] = CHAPTERS[key];

@@ -21,7 +21,7 @@ const SHORT = {
 
 // long promo: every original scene at its authored pace plus the new chapters; new scenes run on their own clock from 0
 // news opener, chapter cards between the big sections, and longer holds on the text-heavy pages
-const LONG_LEN = [['intro', 8], ['lnews', 12], ['problemA', 5], ['problemB', 5], ['ppd', 5],
+const LONG_LEN = [['intro', 8], ['lnews', 19], ['problemA', 5], ['problemB', 5], ['ppd', 5],
   ['ch2', 2], ['limits', 8], ['tyre', 6], ['approach', 8],
   ['ch3', 2], ['physics', 10], ['charge', 8],
   ['ch4', 2], ['rig', 7], ['device', 16], ['build', 9],
