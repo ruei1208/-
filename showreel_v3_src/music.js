@@ -73,7 +73,7 @@ export async function renderMusic() {
     lp.connect(g); g.connect(p); p.connect(pianoBus);
   }
   const padLP = filt('lowpass', 700, 0.6); const padG = ctx.createGain(); padLP.connect(padG); padG.connect(master); send(padG, rev, 0.6);
-  { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(END)); f.exponentialRampToValueAtTime(700, DUR); }
+  if (!EDIT.TRAILER) { const f = padLP.frequency; f.setValueAtTime(380, 0); f.exponentialRampToValueAtTime(900, B(8)); f.setValueAtTime(900, B(CUT.safety)); f.exponentialRampToValueAtTime(1100, B(CUT.stat)); f.setValueAtTime(1100, B(END)); f.exponentialRampToValueAtTime(700, DUR); }
   function pad(t, notes, dur) {
     for (const m of notes) for (const [type, det, pan, a] of [['sawtooth', -7, -0.5, 0.010], ['sawtooth', 7, 0.5, 0.010], ['triangle', 0, 0, 0.022]]) {
       const o = ctx.createOscillator(); o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
@@ -107,6 +107,55 @@ export async function renderMusic() {
   function powerDown(t) { const o = ctx.createOscillator(); o.frequency.setValueAtTime(330, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.9); const g = ctx.createGain(); g.gain.setValueAtTime(0.055, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.0); o.connect(g); g.connect(master); send(g, rev, 0.5); o.start(t); o.stop(t + 1.05); }
   function swell(t0, t1, v = 1) { const lp = filt('lowpass', 400); lp.frequency.setValueAtTime(400, t0); lp.frequency.exponentialRampToValueAtTime(5000, t1); const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.045 * v, t1); g.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.3); noise(t0, t1 - t0 + 0.3, lp); lp.connect(g); g.connect(master); send(g, rev, 0.6); }
   function bell(t, m, v = 1) { for (const [h, a, d] of [[1, 1, 3.5], [2.76, 0.35, 1.6], [5.4, 0.12, 0.8]]) { const o = ctx.createOscillator(); o.frequency.value = mtof(m) * h; const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.035 * v * a, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(pianoBus); o.start(t); o.stop(t + d + 0.05); } }
+
+  if (EDIT.TRAILER) { trailerScore(); return await ctx.startRendering(); }
+
+  // ---------- trailer score: rain and a low drone under the news, a riser into silence at the turn,
+  // a hit on 輪胎, a driving montage, and one last hit under the title
+  function trailerScore() {
+    master.gain.value = 0.5;   // the trailer stacks more layers; leave the limiter headroom so it never clips into clicks
+    const T = n => B(CUT[n]);
+    const fade = (g, pts) => { g.gain.setValueAtTime(pts[0][1], pts[0][0]); for (const [t, v] of pts.slice(1)) g.gain.linearRampToValueAtTime(v, t); };
+    // rain bed
+    { const lp = filt('lowpass', 5000), hp = filt('highpass', 900), g = ctx.createGain(); fade(g, [[0, 0], [1.2, 0.05], [T('tNews1'), 0.035], [T('tTurn') - 0.3, 0.02], [T('tTurn'), 0]]);
+      for (let k = 0; k < 14; k++) noise(k * 3, 3.1, hp); hp.connect(lp); lp.connect(g); g.connect(master); send(g, rev, 0.3); }
+    // tyres passing in the opening
+    [1.6, 4.4].forEach(t0 => { const bp = filt('bandpass', 300, 0.8), g = ctx.createGain(); bp.frequency.setValueAtTime(220, t0); bp.frequency.linearRampToValueAtTime(520, t0 + 1.2); bp.frequency.linearRampToValueAtTime(240, t0 + 2.6);
+      fade(g, [[t0, 0], [t0 + 1.2, 0.06], [t0 + 2.6, 0]]); noise(t0, 2.7, bp); bp.connect(g); g.connect(master); });
+    // low drone that slowly opens up until the turn
+    { const lp = filt('lowpass', 200, 0.9), g = ctx.createGain(); lp.frequency.setValueAtTime(160, 0); lp.frequency.exponentialRampToValueAtTime(260, T('tNews1')); lp.frequency.exponentialRampToValueAtTime(1300, T('tTurn') - 0.2);
+      fade(g, [[0, 0], [3, 0.05], [T('tTurn') - 0.25, 0.085], [T('tTurn'), 0]]);
+      for (const [m, det] of [[38, -6], [38, 6], [45, 0], [50, -4]]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; o.connect(lp); o.start(0); o.stop(T('tTurn') + 0.1); }
+      lp.connect(g); g.connect(master); send(g, rev, 0.4); }
+    // a sparse piano motif over the news cards
+    [[T('tNews1'), 62], [T('tNews1') + B(4), 65], [T('tSalmon'), 60], [T('tSalmon') + B(4), 57], [T('tUrine'), 62], [T('tEU'), 65], [T('tTaiwan'), 64], [T('tTaiwan') + B(4), 69]].forEach(([t, m]) => { piano(t, m, 0.5, 3.6, -0.1); piano(t, m - 12, 0.35, 3.6, 0.1); });
+    // a hit on each news card, ticking that tightens toward the turn
+    const boom = (t, v = 1) => { const o = ctx.createOscillator(); o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(32, t + 0.9); const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.28 * v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6); o.connect(g); g.connect(master); send(g, rev, 0.5); o.start(t); o.stop(t + 1.7);
+      const lp = filt('lowpass', 1800), ng = ctx.createGain(); ng.gain.setValueAtTime(0, t); ng.gain.linearRampToValueAtTime(0.08 * v, t + 0.005); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.5); noise(t, 0.55, lp); lp.connect(ng); ng.connect(master); send(ng, rev, 0.6); };
+    ['tNews1', 'tSalmon', 'tUrine', 'tEU', 'tTaiwan'].forEach((n, i) => boom(T(n), 0.7 + i * 0.06));
+    for (let t = T('tSalmon'); t < T('tTurn') - 0.4; ) { tick(t, 0.6); t += t < T('tEU') ? BEAT : BEAT / 2; }
+    // riser into silence, then the hit on 輪胎
+    swell(T('tTurn') - 2.4, T('tTurn') - 0.05, 1.3);
+    const braam = (t, v = 1, len = 3.2) => { const lp = filt('lowpass', 300, 1.2), g = ctx.createGain(); lp.frequency.setValueAtTime(300, t); lp.frequency.exponentialRampToValueAtTime(2400, t + 0.25); lp.frequency.exponentialRampToValueAtTime(400, t + len);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.11 * v, t + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      for (const [m, det] of [[26, -8], [26, 8], [38, 0], [45, -5], [50, 5]]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; o.connect(lp); o.start(t); o.stop(t + len + 0.1); }
+      lp.connect(g); g.connect(master); send(g, rev, 0.6); boom(t, v); };
+    braam(T('tTurn') + B(3), 1);
+    // montage: driving pulse, a hit on every cut
+    const m0 = T('tMontage'), m1 = T('end');
+    for (let t = m0; t < m1 - 0.01; t += BEAT) kick(t, 0.9);
+    for (let t = m0 + BEAT / 2; t < m1 - 0.01; t += BEAT) tick(t, 0.7);
+    for (let t = m0 + BEAT; t < m1 - 0.01; t += 2 * BEAT) rim(t, 0.7);
+    for (let k = 0; k < 5; k++) boom(m0 + k * B(4), 0.6);
+    { const lp = filt('lowpass', 900, 0.7), g = ctx.createGain(); lp.frequency.setValueAtTime(700, m0); lp.frequency.exponentialRampToValueAtTime(2600, m1); fade(g, [[m0, 0], [m0 + 0.5, 0.035], [m1 - 0.2, 0.05], [m1, 0]]);
+      for (const m of [50, 53, 57, 62]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.connect(lp); o.start(m0); o.stop(m1 + 0.1); } lp.connect(g); g.connect(master); send(g, rev, 0.5); }
+    for (let b = 0; b < 20; b++) { const c = CH[CYCLE[Math.floor(b / 4) % 4]], seq = [0, 2, 4, 3]; for (const h of [0, 1]) piano(m0 + B(b + h / 2), c.v[seq[(b * 2 + h) % 4]] + 12, h ? 0.3 : 0.42, 1.6, 0); }
+    swell(m1 - 1.6, m1 - 0.05, 1.1);
+    // title
+    braam(m1, 0.9, 5);
+    [41, 48, 53, 57, 60, 64, 67, 72].forEach((m, i) => piano(m1 + 0.6 + i * 0.05, m, 0.5, 4, (i - 4) * 0.08));
+    bell(m1 + B(4), 76, 0.8); bell(m1 + B(5), 79, 0.5);
+  }
 
   // ---------- arrangement
   for (let bar = 0; bar < BARS; bar++) {
