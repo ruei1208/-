@@ -631,7 +631,7 @@ function sLNews(ctx, t) {
   kicker(ctx, 140, 170, '01 — IN THE NEWS', t, 0);
   const ONE = 3, LIST = items.length * ONE;
   if (t < LIST) {
-    const i = Math.floor(t / ONE), u = t - i * ONE, out = 1 - tw(u, ONE - 0.35, ONE), [d, h, src] = items[i];
+    const i = clamp(Math.floor(t / ONE), 0, items.length - 1), u = t - i * ONE, out = 1 - tw(u, ONE - 0.35, ONE), [d, h, src] = items[i];   // t < 0 while the previous page wipes off
     txt(ctx, `${i + 1} / ${items.length}`, W - 140, 170, fM(500, 22), C.mute, 'right', out, 3);
     txt(ctx, d, 140, 420, fM(500, 30), C.acc, 'left', tw(u, 0.05, 0.4) * out, 4);
     ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; seg(ctx, 140, 450, 140 + 120 * tw(u, 0.1, 0.6, E.ioC), 450); ctx.restore();
