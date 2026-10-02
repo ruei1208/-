@@ -1,0 +1,14 @@
+import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+import fs from 'fs'; import { execFileSync } from 'child_process';
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 2230, height: 3175 }, deviceScaleFactor: process.argv[2] === 'pdf' ? 1 : 0.6 });
+const cache = {};
+await p.route(/fonts\.(googleapis|gstatic)\.com/, r => { const u = r.request().url();
+  const body = cache[u] ??= execFileSync('curl', ['-s', '-A', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36', u], { maxBuffer: 1 << 26 });
+  r.fulfill({ body, contentType: u.includes('googleapis') ? 'text/css' : 'font/woff2', headers: { 'access-control-allow-origin': '*' } }); });
+p.on('pageerror', e => console.log('PAGEERR', e.message));
+await p.goto('file://' + process.cwd() + '/poster.html'); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(1500);
+const ov = await p.evaluate(() => [...document.querySelectorAll('.col,.wide .box')].map(e => { const r = e.getBoundingClientRect(); return [e.className, Math.round(r.bottom / 3.7795 * 10) / 10, e.scrollHeight > e.clientHeight + 1]; }));
+console.log(JSON.stringify(ov));
+if (process.argv[2] === 'pdf') await p.pdf({ path: process.argv[3], width: '590mm', height: '840mm', printBackground: true, preferCSSPageSize: true });
+else await p.screenshot({ path: process.argv[3] });
+await b.close();

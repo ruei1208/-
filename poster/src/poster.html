@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<title>TRWP 專題海報</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+@page { size: 590mm 840mm; margin: 0; }
+:root { --band: #D6D4FC; --ink: #1d1f33; --ink2: #44475e; --mute: #6c6f86; --ind: #2B2F8F; --blue: #1C3BE1; --acc: #E06A0C; --pale: #F1F0FE; --line: #C9C7EE; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 590mm; height: 840mm; background: #fff; }
+body { position: relative; overflow: hidden; font-family: "Noto Sans TC", sans-serif; color: var(--ink); font-size: 7.1mm; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* template */
+.band { position: absolute; left: 0; top: 0; width: 590mm; height: 129mm; background: var(--band); }
+.shade { position: absolute; left: 0; top: 129mm; width: 590mm; height: 9mm; background: linear-gradient(#88898c 0, #8f8f8f 12%, #a9aaa6 30%, #d3d3d3 55%, #f6f6f6 80%, #fff 100%); }
+.logo { position: absolute; left: 9mm; top: 10mm; height: 108mm; }
+.head { position: absolute; left: 150mm; right: 14mm; top: 0; height: 129mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 9mm; font-family: "Noto Serif TC", serif; color: #000; }
+.head .t1 { font-size: 15.5mm; font-weight: 900; line-height: 1.25; letter-spacing: 0.02em; }
+.head .t1 .grp { display: block; font-size: 11mm; font-weight: 700; margin-bottom: 3mm; letter-spacing: 0.08em; }
+.head .t2 { font-size: 11mm; font-weight: 700; letter-spacing: 0.12em; }
+.deco { position: absolute; right: 0; bottom: 0; width: 197mm; }
+.cyu { position: absolute; left: 8.6mm; top: 776mm; font-family: Arial, "Liberation Sans", sans-serif; color: var(--blue); font-size: 17.5mm; line-height: 1; white-space: nowrap; }
+.cyu.i2 { left: 86mm; top: 806mm; font-style: italic; font-size: 19mm; }
+
+/* layout */
+.col { position: absolute; top: 146mm; width: 176.6mm; display: flex; flex-direction: column; gap: 7mm; }
+.c1 { left: 18mm; } .c2 { left: 206.7mm; } .c3 { left: 395.4mm; }
+.wide { position: absolute; left: 18mm; width: 365.3mm; top: 641mm; height: 126mm; }
+section h2 { display: flex; align-items: center; gap: 4mm; font-size: 10.2mm; font-weight: 900; color: var(--ind); line-height: 1.2; padding-bottom: 2.4mm; margin-bottom: 3.6mm; border-bottom: 0.8mm solid var(--ind); }
+section h2 .n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 13mm; height: 13mm; border-radius: 2mm; background: var(--ind); color: #fff; font-size: 7.4mm; font-weight: 700; }
+h3 { font-size: 7.4mm; font-weight: 900; color: var(--ind); margin: 1mm 0 1.6mm; }
+p { color: var(--ink2); }
+p + p { margin-top: 1.6mm; }
+b, strong { color: var(--ink); font-weight: 700; }
+.acc { color: var(--acc); font-weight: 900; }
+ul.dots { list-style: none; color: var(--ink2); }
+ul.dots li { position: relative; padding-left: 5.5mm; }
+ul.dots li + li { margin-top: 1.2mm; }
+ul.dots li::before { content: ""; position: absolute; left: 0.6mm; top: 3.6mm; width: 2.2mm; height: 2.2mm; border-radius: 50%; background: var(--ind); }
+.fig { margin-top: 3mm; }
+.fig img { display: block; width: 100%; }
+.cap { font-size: 5mm; color: var(--mute); line-height: 1.35; margin-top: 1.4mm; }
+.row { display: flex; gap: 4mm; align-items: flex-start; }
+.row > * { flex: 1; min-width: 0; }
+.stat { background: var(--pale); border-radius: 2.5mm; padding: 3mm 4mm; }
+.stat .v { font-size: 13mm; font-weight: 900; color: var(--acc); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .v small { font-size: 6mm; color: var(--ink); margin-left: 1mm; }
+.stat .k { font-size: 5.7mm; color: var(--ink2); line-height: 1.35; margin-top: 1mm; }
+table { width: 100%; border-collapse: collapse; font-size: 5.9mm; line-height: 1.35; }
+th, td { padding: 1.7mm 2mm; text-align: left; vertical-align: top; border-bottom: 0.3mm solid var(--line); }
+th { background: var(--ind); color: #fff; font-weight: 700; }
+tr.me td { background: var(--pale); color: var(--ink); font-weight: 700; }
+td.ok { color: var(--ind); font-weight: 900; white-space: nowrap; }
+.fx { display: flex; justify-content: center; gap: 9mm; font-family: "Noto Serif TC", serif; font-size: 9mm; font-weight: 700; color: var(--ink); margin: 2.5mm 0 1.5mm; }
+.fx i { font-style: italic; }
+.sdg { display: flex; gap: 3mm; margin-top: 3mm; }
+.sdg span { flex: 1; border: 0.5mm solid var(--ind); border-radius: 2mm; padding: 1.6mm 2mm; font-size: 5.4mm; line-height: 1.3; color: var(--ink2); }
+.sdg span b { display: block; color: var(--ind); font-size: 5.6mm; }
+.stages { display: flex; gap: 3mm; }
+.stages div { flex: 1; background: var(--pale); border-top: 1.4mm solid var(--ind); border-radius: 0 0 2mm 2mm; padding: 2.4mm 3mm; font-size: 5.7mm; line-height: 1.38; color: var(--ink2); }
+.stages div b { display: block; font-size: 6.4mm; color: var(--ind); margin-bottom: 0.8mm; }
+.note { font-size: 5.8mm; color: var(--mute); line-height: 1.4; }
+svg text { font-family: "Noto Sans TC", sans-serif; }
+svg.foot text { font-family: Arial, "Liberation Sans", sans-serif; }
+.wide .box { height: 100%; background: var(--pale); border-radius: 3mm; padding: 5mm 7mm; display: flex; gap: 9mm; }
+.wide .box > div { flex: 1; }
+.wide ul.dots { font-size: 7.4mm; }
+.wide .note { font-size: 6.4mm; }
+.wide h2 { border-bottom-color: var(--ind); }
+.tags { display: flex; flex-wrap: wrap; gap: 2.4mm; }
+.tags span { background: #fff; border: 0.5mm solid var(--ind); border-radius: 10mm; padding: 1.2mm 4mm; font-size: 6.2mm; color: var(--ind); font-weight: 700; }
+</style></head>
+<body>
+<div class="band"></div><div class="shade"></div>
+<img class="logo" src="img/logo.png" alt="">
+<div class="head">
+  <div class="t1"><span class="grp">實作組-6</span>主動式輪胎磨損微粒(TRWP)靜電捕捉裝置</div>
+  <div class="t2">陳睿瑀　林子鈞　李恩</div>
+</div>
+
+<!-- ============ column 1 ============ -->
+<div class="col c1">
+  <section>
+    <h2><span class="n">01</span>研究背景</h2>
+    <p>電動車普及使廢氣排放下降，但電池增加車重、瞬間扭力大，<b>輪胎與路面磨損微粒（TRWP）</b>的排放並未隨之改善。</p>
+    <div class="row" style="margin-top:3mm">
+      <div class="stat"><div class="v">28<small>%</small></div><div class="k">TRWP 為全球初級微塑膠<br>第二大來源</div></div>
+      <div class="stat"><div class="v">+53.5<small>%</small></div><div class="k">全球乘用車非廢氣微粒<br>排放量 2030 年預估增幅</div></div>
+    </div>
+    <div class="row" style="margin-top:3mm; align-items:center">
+      <div style="flex:0 0 80mm"><img src="img/image1.jpeg" style="width:100%;display:block"><div class="cap">全球初級微塑膠來源比例<br>（Boucher &amp; Friot, IUCN, 2017）</div></div>
+      <div><p>輪胎含防老劑 <b>6PPD</b>，其氧化產物 <b>6PPD-Q</b> 隨雨水進入水體，已證實<b>對水生生物具急性毒性</b>，且<b>已在人體尿液中檢出</b>。</p></div>
+    </div>
+  </section>
+  <section>
+    <h2><span class="n">02</span>現有方案與本專題</h2>
+    <table>
+      <tr><th style="width:27%">方案</th><th style="width:27%">原理</th><th>限制／特點</th></tr>
+      <tr><td>傳統濾網</td><td>物理過濾</td><td>增加風阻、易堵塞，影響續航</td></tr>
+      <tr><td>被動導流</td><td>慣性分離</td><td>對細懸浮微粒 PM2.5 捕捉有限</td></tr>
+      <tr class="me"><td>本專題</td><td>主動式<br>高壓靜電</td><td>無濾網，以庫侖力吸附導電微粒</td></tr>
+    </table>
+    <ul class="dots" style="margin-top:3mm">
+      <li>將 <b>15 kV</b> 直流高壓電場微型化，整合至 <b>48 V 輪轂馬達</b>系統</li>
+      <li>機電整合：雨滴感測安全斷電、可抽式集塵盒</li>
+    </ul>
+    <div class="sdg"><span><b>SDG 3</b>良好健康與福祉</span><span><b>SDG 9</b>產業、創新與基礎建設</span><span><b>SDG 11</b>永續城市與社區</span></div>
+  </section>
+  <section>
+    <h2><span class="n">03</span>作動原理</h2>
+    <div class="row" style="align-items:center">
+      <div style="flex:0 0 100mm"><img src="img/image2.png" style="width:100%;display:block"><div class="cap">帶電微粒於平行板電場中的受力</div></div>
+      <div>
+        <div class="fx" style="flex-direction:column;gap:1mm;align-items:center"><span><i>F</i> = <i>qE</i></span><span><i>E</i> = <i>V</i> / <i>d</i></span></div>
+        <p style="text-align:center;font-size:5.6mm"><i>V</i> = 15 kV，<i>d</i> = 17 mm</p>
+      </div>
+    </div>
+    <p style="margin-top:2.4mm">微粒經輪胎摩擦及接觸極板而帶電。TRWP 含碳黑等導電填料，其中粒徑較小者慣性小，較易在 17 mm 極板間被電場偏折並吸附；受力與電壓成正比、與間距成反比。</p>
+  </section>
+</div>
+
+<!-- ============ column 2 ============ -->
+<div class="col c2">
+  <section>
+    <h2><span class="n">04</span>裝置設計</h2>
+    <div class="row" style="align-items:flex-end">
+      <div><img src="img/image3.png" style="width:100%;display:block"><div class="cap">設計草圖（Autodesk Inventor）</div></div>
+      <div style="flex:0 0 58mm"><img src="img/f5.jpg" style="width:100%;display:block"><div class="cap">裝置雛形</div></div>
+    </div>
+    <table style="margin-top:3mm">
+      <tr><th style="width:36%">設計項目</th><th>規格與驗證結果</th></tr>
+      <tr><td>高壓電源鏈路</td><td>110 V→12 V→15 kV，空載與載入均正常運作</td></tr>
+      <tr><td>極板定距結構</td><td>4 片平行銅片、間距 17 mm，尼龍柱定距，振動下無位移</td></tr>
+      <tr><td>絕緣封裝</td><td>熱熔膠封裝，未見沿面漏電與跳火</td></tr>
+      <tr><td>外殼成型</td><td>PLA 3D 列印，可搭載於馬達後方</td></tr>
+          </table>
+    <div class="row" style="margin-top:3mm;align-items:flex-end"><img src="img/f12.jpg" style="flex:0 0 112mm;width:112mm;display:block"><div class="cap">集塵盒回收機構<br>左：極板匣抽出<br>右：組裝完成<br><br>極板匣可整組抽出，粉塵回收時無須拆解極板</div></div>
+  </section>
+  <section>
+    <h2><span class="n">05</span>安全設計：雨滴感測斷電</h2>
+    <div class="fig" style="margin-top:0"><img src="img/image7.png"><div class="cap">雨滴感測器安全保護模組電路方塊圖</div></div>
+    <ul class="dots" style="margin-top:2.6mm">
+      <li>偵測到降雨 → Arduino 控制繼電器，<b>自動切斷 15 kV</b></li>
+      <li>採 <b>NO 常開接點</b>：控制電路故障時繼電器釋放，高壓自動關閉（fail-safe）</li>
+      <li>手動開關串接於最前端，具最高優先權；另設 2 A 保險絲</li>
+      <li>停雨後延遲復電，避免殘留水氣造成誤動作</li>
+    </ul>
+    <table style="margin-top:3mm">
+      <tr><th>驗收項目</th><th style="width:24%">結果</th></tr>
+      <tr><td>開機（乾燥狀態）繼電器通電</td><td class="ok">通過</td></tr>
+      <tr><td>偵測到降雨即時斷電</td><td class="ok">通過</td></tr>
+      <tr><td>停雨後延遲復電</td><td class="ok">通過</td></tr>
+      <tr><td>手動開關強制斷電</td><td class="ok">設計成立</td></tr>
+    </table>
+  </section>
+</div>
+
+<!-- ============ column 3 ============ -->
+<div class="col c3">
+  <section>
+    <h2><span class="n">06</span>實驗方法</h2>
+    <div class="row">
+      <div style="flex:0 0 62mm"><img src="img/f17.jpg" style="width:100%;display:block"><div class="cap">輪轂馬達實驗平台</div></div>
+      <div class="stages" style="flex-direction:column">
+        <div><b>① 靜態</b>封閉導流平台，導電碳粉為替代粉體，以質量守恆計算效率</div>
+        <div><b>② 動態</b>輪胎摩擦 #60 砂紙，350 RPM（約 33 km/h），量測擴散範圍與捕捉質量</div>
+        <div><b>③ 化學</b>高解析質譜比對輪胎粉塵之 6PPD 訊號</div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2><span class="n">07</span>實驗結果</h2>
+    <h3>靜態捕捉效率</h3>
+    <div class="row" style="align-items:center">
+      <div id="g-static"></div>
+      <div style="flex:0 0 52mm">
+        <div class="stat"><div class="v" style="font-size:8.6mm">0.72→16.29<small>%</small></div><div class="k">電場開啟 15 kV 後提升約 22 倍，兩組數值範圍不重疊</div></div>
+      </div>
+    </div>
+    <h3 style="margin-top:3.4mm">粉塵擴散範圍 → 決定裝置位置</h3>
+    <div id="g-env"></div>
+    <p class="note">擴散範圍水平 0–73 cm，沉積量最多處位於 27 cm（寬約 21 cm），裝置置於 25 cm。初期測試中，1 cm 處沉積量反低於 3、5 cm：<b>距離輪胎越近，沉積量不一定越多</b>。</p>
+    <h3 style="margin-top:3.4mm">動態捕捉效率（350 RPM，各重複 3 次）</h3>
+    <div class="row" style="align-items:center">
+      <div id="g-dyn"></div>
+      <div style="flex:0 0 52mm">
+        <div class="stat"><div class="v">≈28<small>%</small></div><div class="k">三次整體效率<br>平均 27.6%</div></div>
+      </div>
+    </div>
+    <h3 style="margin-top:3.4mm">高解析質譜（Bruker micrOTOF II）</h3>
+    <table>
+      <tr><th>樣品</th><th style="width:27%">m/z 實測</th><th style="width:22%">質量誤差</th></tr>
+      <tr><td>1　砂紙直接磨耗之輪胎粉塵</td><td>268.1926</td><td>2.98 ppm</td></tr>
+      <tr class="me"><td>2　本裝置集塵盒收集之粉塵</td><td>268.1930</td><td>1.49 ppm</td></tr>
+    </table>
+    
+    <p class="note" style="margin-top:1.6mm">6PPD 理論值 268.1934 Da。兩組樣品於 m/z 268 皆出現與 6PPD 相近之訊號（誤差 &lt; 5 ppm），惟同位素強度比與理論值不完全吻合，現階段以<b>「疑似 6PPD」</b>描述，仍待 6PPD 標準品比對確認。</p>
+  </section>
+</div>
+
+<!-- ============ conclusion ============ -->
+<div class="wide"><section class="box">
+  <div>
+    <h2><span class="n">08</span>結論</h2>
+    <ul class="dots">
+      <li>完成整合 15 kV 直流電場與 48 V 輪轂馬達之車載靜電捕捉模組，振動與動態運轉中未觀察到漏電或跳火</li>
+      <li>靜態效率由 0.72% 提升至 16.29%，驗證電場之主動吸附作用；動態 350 RPM 下捕捉效率約 28%</li>
+      <li>建立「粉塵擴散包絡線量測法」，作為裝置放置位置的依據</li>
+      <li>裝置收集之粉塵於 m/z 268 出現疑似 6PPD 訊號，仍待標準品比對確認</li>
+    </ul>
+  </div>
+  <div style="flex:0 0 150mm">
+    <h2><span class="n">09</span>未來工作</h2>
+    <div class="tags"><span>多轉速測試</span><span>裝置位置最佳化</span><span>增加重複次數</span><span>不同電壓對照</span><span>6PPD 標準品比對</span></div>
+    <p class="note" style="margin-top:3mm">應用方向：優先以商用車隊（公車、貨車）進行場域驗證。</p>
+    <p class="note" style="margin-top:1.4mm">致謝：中原大學化學系 蔡祐輔教授 提供高解析質譜儀。</p>
+  </div>
+</section></div>
+
+<img class="deco" src="img/deco.png" alt="">
+<svg class="foot" viewBox="0 0 590 840" style="position:absolute;left:0;top:0;width:590mm;height:840mm;pointer-events:none"><g font-family="Arial, 'Liberation Sans', sans-serif" fill="#1C3BE1"><text x="8.6" y="797" font-size="24.5" id="ft1">Chung Yuan Christian University</text><text x="86" y="831" font-size="28.5" font-style="italic" id="ft2">Mechanical Engineering</text></g></svg>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const C = { ind: '#2B2F8F', acc: '#E06A0C', ink: '#1d1f33', ink2: '#44475e', mute: '#6c6f86', grid: '#DAD9F2', pale: '#F1F0FE', soft: '#A9ABDD' };
+function svg(id, w, h, body) { const el = document.getElementById(id); el.innerHTML = `<svg xmlns="${NS}" viewBox="0 0 ${w} ${h}" style="width:100%;display:block">${body}</svg>`; }
+const T = (x, y, s, size = 5, fill = C.ink2, anchor = 'middle', weight = 400) => `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-weight="${weight}">${s}</text>`;
+
+// static: every trial, off vs on
+{ const off = [1.00, 0.67, 0.50], on = [9.00, 17.00, 18.67, 21.00, 15.80];
+  const W = 120, H = 66, x0 = 14, y0 = 54, sy = v => y0 - v * 2.2; let b = '';
+  for (const v of [0, 10, 20]) b += `<line x1="${x0}" x2="${W - 2}" y1="${sy(v)}" y2="${sy(v)}" stroke="${C.grid}" stroke-width="0.3"/>` + T(x0 - 2, sy(v) + 1.5, v, 4, C.mute, 'end');
+  const bw = 8, gap = 3.2; let x = x0 + 4;
+  off.forEach(v => { b += `<rect x="${x}" y="${sy(v)}" width="${bw}" height="${y0 - sy(v)}" fill="${C.soft}"/>`; x += bw + gap; });
+  const xm = x; x += 6;
+  on.forEach(v => { b += `<rect x="${x}" y="${sy(v)}" width="${bw}" height="${y0 - sy(v)}" fill="${C.acc}"/>`; x += bw + gap; });
+  b += `<line x1="${x0 + 2}" x2="${xm - 1}" y1="${sy(0.72)}" y2="${sy(0.72)}" stroke="${C.ind}" stroke-width="0.5" stroke-dasharray="1.4 1"/>`;
+  b += `<line x1="${x0 + 2}" x2="${x}" y1="${sy(16.29)}" y2="${sy(16.29)}" stroke="${C.ind}" stroke-width="0.5" stroke-dasharray="1.4 1"/>` + T(x0 + 3, sy(16.29) - 1.6, '開啟平均 16.29%', 4.4, C.ind, 'start');
+  b += `<line x1="${x0}" x2="${W - 2}" y1="${y0}" y2="${y0}" stroke="${C.ink2}" stroke-width="0.4"/>`;
+  b += T((x0 + 4 + xm) / 2, y0 + 6, '電場關閉 n=3', 4.8) + T((xm + 6 + x) / 2, y0 + 6, '15 kV 開啟 n=5', 4.2, C.acc, 'middle', 700);
+  b += T(3, 5, '效率 (%)', 4.4, C.mute, 'start');
+  svg('g-static', W, H, b); }
+
+// envelope: upper edge of the dust cloud vs distance (same scale both axes); tyre Ø50 cm at 0, device 4 × 17.3 cm at 25 cm
+{ const pts = [[30, 14], [35, 10], [40, 8], [45, 6], [50, 5], [55, 4.5], [60, 4], [65, 2], [70, 0], [73, 0]];
+  const k = 1.95, W = 176, H = 62, x0 = 24, sx = v => x0 + v * k, y0 = 48, sy = v => y0 - v * k; let b = '';
+  b += `<rect x="${sx(16.5)}" y="${y0}" width="${21 * k}" height="2.2" fill="${C.ind}"/>` + T(sx(27), y0 + 9.6, '沉積最多 27 cm', 4.4, C.ind, 'middle', 700);
+  b += `<circle cx="${sx(0)}" cy="${sy(25)}" r="${25 * k}" fill="#fff" stroke="${C.ink2}" stroke-width="0.6"/>`;
+  b += `<path d="M${sx(0)},${sy(0)} C${sx(12)},${sy(0.5)} ${sx(22)},${sy(6)} ${sx(30)},${sy(14)}" fill="none" stroke="${C.acc}" stroke-width="0.7" stroke-dasharray="1.6 1.2"/>`;
+  b += `<path d="M${pts.map(([x, y]) => `${sx(x)},${sy(y)}`).join(' L')}" fill="none" stroke="${C.acc}" stroke-width="0.9"/>`;
+  pts.slice(0, -1).forEach(([x, y]) => b += `<circle cx="${sx(x)}" cy="${sy(y)}" r="0.9" fill="${C.acc}"/>`);
+  b += T(sx(32), sy(14) + 1, '最大飛散高度 14 cm', 4.5, C.acc, 'start', 700);
+  b += `<rect x="${sx(25)}" y="${sy(17.3)}" width="${4 * k}" height="${17.3 * k}" fill="${C.ind}" fill-opacity="0.18" stroke="${C.ind}" stroke-width="0.6"/>` + T(sx(27), sy(17.3) - 1.6, '裝置（25 cm）', 4.5, C.ind, 'middle', 700);
+  b += `<line x1="0" x2="${W}" y1="${y0}" y2="${y0}" stroke="${C.ink2}" stroke-width="0.4"/>`;
+  for (const v of [0, 10, 20, 30, 40, 50, 60, 73]) b += `<line x1="${sx(v)}" x2="${sx(v)}" y1="${y0}" y2="${y0 + 1.4}" stroke="${C.ink2}" stroke-width="0.4"/>` + (v === 20 || v === 30 ? '' : T(sx(v), y0 + 5.2, v, 4.2, C.mute));
+  b += T(W - 1, y0 + 12.5, '水平距離 (cm)；30 cm 以內虛線為示意', 4.2, C.mute, 'end');
+  svg('g-env', W, H, b); }
+
+// dynamic: mean dust vs captured mass with SD
+{ const d = [['10 s', 0.008, 0.001, 0.002, 0.001], ['20 s', 0.011, 0.001, 0.003, 0.001], ['30 s', 0.017, 0.001, 0.005, 0.001]];
+  const W = 120, H = 66, x0 = 16, y0 = 56, sy = v => y0 - v * 2300; let b = '';
+  for (const v of [0, 0.005, 0.010, 0.015]) b += `<line x1="${x0}" x2="${W - 2}" y1="${sy(v)}" y2="${sy(v)}" stroke="${C.grid}" stroke-width="0.3"/>` + T(x0 - 2, sy(v) + 1.4, v.toFixed(3), 4.2, C.mute, 'end');
+  d.forEach(([k, m, ms, c, cs], i) => { const x = x0 + 8 + i * 33;
+    for (const [v, s, dx, col] of [[m, ms, 0, C.soft], [c, cs, 11, C.acc]]) { b += `<rect x="${x + dx}" y="${sy(v)}" width="10" height="${y0 - sy(v)}" fill="${col}"/>`;
+      b += `<line x1="${x + dx + 5}" x2="${x + dx + 5}" y1="${sy(v + s)}" y2="${sy(Math.max(0, v - s))}" stroke="${C.ink}" stroke-width="0.4"/><line x1="${x + dx + 3.4}" x2="${x + dx + 6.6}" y1="${sy(v + s)}" y2="${sy(v + s)}" stroke="${C.ink}" stroke-width="0.4"/>`; }
+    b += T(x + 10.5, y0 + 5.6, k, 4.8); });
+  b += `<line x1="${x0}" x2="${W - 2}" y1="${y0}" y2="${y0}" stroke="${C.ink2}" stroke-width="0.4"/>`;
+  b += `<rect x="${x0 + 2}" y="1.6" width="3.4" height="3.4" fill="${C.soft}"/>` + T(x0 + 7, 4.8, '粉塵質量', 4.4, C.ink2, 'start') + `<rect x="${x0 + 30}" y="1.6" width="3.4" height="3.4" fill="${C.acc}"/>` + T(x0 + 35, 4.8, '裝置吸附質量', 4.4, C.ink2, 'start');
+  b += T(3, 10.5, '(g)', 4.2, C.mute, 'start') + T(W - 2, 10.5, '誤差棒：±1 標準差', 4.2, C.mute, 'end');
+  svg('g-dyn', W, H, b); }
+</script>
+</body></html>
