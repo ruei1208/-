@@ -1,12 +1,13 @@
 import { SYNC, B, CUT, BEAT, BEATS, DUR, clock } from './music.js';
-import { EDIT } from './edit.js';
+import { EDIT, CHAPTERS } from './edit.js';
 import { loadDevice, setPose, render, project, partCenter, D3 } from './device3d.js';
 
 export const W = 1920, H = 1080, FPS = 60;
 export { DUR };
 const TAU = Math.PI * 2, PI = Math.PI;
 const C = { bg: '#0A0A0A', ink: '#F2F2F2', ink2: '#C8C8C8', mute: '#8A8A8A', dim: '#4A4A4A', line: '#262626', acc: '#FF8A00', acc2: '#FFB45C', red: '#FF3B2F' };
-const fS = (w, s) => `${w} ${s}px "Noto Serif TC",serif`;
+// the long cut is watched on phones and projectors: small serif text is set a few px larger there
+const fS = (w, s) => `${w} ${EDIT.LONG && s < 26 ? s + 4 : s}px "Noto Serif TC",serif`;
 const fM = (w, s) => `${w} ${s}px "IBM Plex Mono","Noto Sans TC",monospace`;
 // ------------------------------------------------------------ motion kit
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -79,6 +80,8 @@ function type(ctx, str, x, y, t, t0, font, color, cps = 40, cursor = true) {
 function txt(ctx, s, x, y, font, color, align = 'left', alpha = 1, ls = 0) { if (alpha <= 0) return; ctx.save(); ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.globalAlpha = alpha; if (ls) ctx.letterSpacing = ls + 'px'; ctx.fillText(s, x, y); ctx.restore(); }
 function digits(ctx, s, x, y, font, color) { ctx.save(); ctx.font = font; ctx.fillStyle = color; const cw = ctx.measureText('0').width; let cx = x;
   for (const ch of s) { const w = /[0-9]/.test(ch) ? cw : ctx.measureText(ch).width; ctx.fillText(ch, cx, y); cx += w; } ctx.restore(); return cx - x; }
+// source line for anything quoted from the literature: same place and style on every page
+function cite(ctx, t, str, t0) { txt(ctx, '資料來源：' + str, 140, 972, fS(700, 20), C.mute, 'left', tw(t, t0, t0 + 0.6)); }
 function kicker(ctx, x, y, s, t, t0) {
   const p = tw(t, t0, t0 + 0.5); ctx.save(); ctx.fillStyle = C.acc; ctx.fillRect(x, y - 15, 14 * p, 14); ctx.restore();
   reveal(ctx, s, x + 28, y, { t, t0: t0 + 0.06, font: fM(500, 20), size: 20, color: C.acc, ls: 3, stagger: 0.014 });
@@ -167,7 +170,7 @@ function sProblemA(ctx, t) {                     // beats 8-12
   counter(ctx, 28 * tw(t, s(8), s(9.8), E.outExpo), 0, 140, 560, 300, C.acc, '%', C.ink, 0.4);
   reveal(ctx, '全球初級微塑膠的', 146, 680, { t, t0: s(8.6), font: fS(700, 52), size: 52, dur: 0.9 });
   reveal(ctx, '第二大來源', 146, 752, { t, t0: s(9.2), font: fS(900, 52), size: 52, color: C.acc, dur: 0.9 });
-  txt(ctx, '資料來源：Boucher & Friot, 2017', 148, 820, fS(700, 22), C.mute, 'left', tw(t, s(9.8), s(10.5)));
+  cite(ctx, t, 'Boucher & Friot, Primary Microplastics in the Oceans, IUCN, 2017', s(9.8));
   const dx = 1370, dy = 520, Rr = 220;
   ctx.save(); ctx.strokeStyle = C.dim; ctx.lineWidth = 1; arc(ctx, dx, dy, Rr, -PI / 2, -PI / 2 + TAU, tw(t, s(8), s(9.2), E.ioC));
   ctx.setLineDash([2, 10]); ctx.lineDashOffset = -t * 8; ctx.strokeStyle = C.mute; arc(ctx, dx, dy, Rr + 46, 0, TAU, tw(t, s(8.2), s(9.6), E.ioC)); ctx.setLineDash([]); ctx.restore();
@@ -206,6 +209,7 @@ function sProblemB(ctx, t) {                     // beats 12-15
   ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; poly(ctx, pts, pr); ctx.restore();
   if (pr > 0) { const [ex, ey] = pts[Math.round(pr * 60)]; ctx.save(); ctx.fillStyle = C.bg; ctx.strokeStyle = C.acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ex, ey, 8, 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore(); }
   txt(ctx, '+53.5%', gx + gw - 14, gy + 26, fM(600, 28), C.acc, 'right', tw(t, s(14), s(14.5)));
+  cite(ctx, t, 'OECD, Non-exhaust Particulate Emissions from Road Transport, 2020', s(13.2));
 }
 function sPPD(ctx, t) {                          // beats 15-18
   kicker(ctx, 140, 170, '01 — 6PPD', t, s(15));
@@ -226,8 +230,12 @@ function sPPD(ctx, t) {                          // beats 15-18
   reveal(ctx, '6PPD', 1100, 420, { t, t0: s(15.3), font: fS(900, 110), size: 110, stagger: 0.06, dur: 1 });
   txt(ctx, 'C₁₈H₂₄N₂ · 輪胎防老劑', 1106, 480, fM(500, 26), C.ink2, 'left', tw(t, s(15.6), s(16.2)));
   reveal(ctx, '氧化成 6PPD-Q', 1100, 610, { t, t0: s(16), font: fS(900, 48), size: 48, color: C.red, dur: 0.9 });
-  reveal(ctx, '對水生生物具急性毒性，', 1100, 680, { t, t0: s(16.5), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
-  reveal(ctx, '已於人體尿液中檢出。', 1100, 732, { t, t0: s(17), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
+  // the long cut already reports the toxicity and the urine finding in its news opener, so here it only says what 6PPD is
+  const [l1, l2, src] = EDIT.LONG ? ['添加於輪胎橡膠中延長壽命，', '並隨輪胎磨損微粒一同釋出。', 'Tian et al., Science, 2021']
+    : ['對水生生物具急性毒性，', '已於人體尿液中檢出。', 'Tian et al., Science, 2021；Du et al., Environ. Sci. Technol. Lett., 2022'];
+  reveal(ctx, l1, 1100, 680, { t, t0: s(16.5), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
+  reveal(ctx, l2, 1100, 732, { t, t0: s(17), font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.03 });
+  cite(ctx, t, src, s(16.5));
 }
 
 // ================================================================ 2 current solutions (beats 18-26)
@@ -391,6 +399,23 @@ function sRig(ctx, t) {
   }
 }
 
+function fieldFX(ctx, t, fp) {   // call right after render('solid') with the pose still set
+  if (fp <= 0) return;
+    const pl = D3.parts.filter(q => q.kind === 'plate'), at3 = (q, x, fy, fz) => project([x, lerp(q.box.min.y, q.box.max.y, fy), lerp(q.box.min.z, q.box.max.z, fz)], q);
+    ctx.save(); ctx.lineCap = 'round';
+    for (let k = 0; k < pl.length - 1; k++) { const a = pl[k], b = pl[k + 1], br = 0.5 + 0.5 * Math.sin(t * 4 + k * 1.3);
+      // glow filling the gap
+      const q = [at3(a, a.box.max.x, 0.06, 0.5), at3(b, b.box.min.x, 0.06, 0.5), at3(b, b.box.min.x, 0.94, 0.5), at3(a, a.box.max.x, 0.94, 0.5)];
+      ctx.fillStyle = rgba(C.acc, fp * (0.14 + 0.1 * br)); ctx.beginPath(); q.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill();
+      for (let m = 0; m < 7; m++) { const fy = 0.1 + m * 0.133, p0 = at3(a, a.box.max.x, fy, 0.5), p1 = at3(b, b.box.min.x, fy, 0.5);
+        const fl = 0.5 + 0.5 * Math.sin(t * 7 + k * 1.7 + m * 0.9);
+        ctx.strokeStyle = rgba(C.acc, fp * (0.55 + 0.35 * fl)); ctx.lineWidth = 2.2; ctx.setLineDash([7, 6]); ctx.lineDashOffset = -t * 40; seg(ctx, p0[0], p0[1], p1[0], p1[1], 1);
+        const u = (t * 0.8 + hash(k * 7 + m)) % 1, to = m % 2 ? p0 : p1, e = E.inC(u);   // a charged speck pulled from mid-gap onto a plate
+        const x = lerp((p0[0] + p1[0]) / 2, to[0], e), y = lerp((p0[1] + p1[1]) / 2, to[1], e);
+        ctx.setLineDash([]); ctx.fillStyle = rgba('#FF6A00', fp * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 3, 0, TAU); ctx.fill(); } }
+    ctx.restore();
+}
+
 // ================================================================ 4 device — real CAD model (beats 36-52)
 function sDevice(ctx, t) {
   const land = [38.5, 39, 39.5, 40].map(b => s(b));
@@ -406,20 +431,7 @@ function sDevice(ctx, t) {
   if (t > scan0) { const img = render('solid'); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W * 0.62 * scanP, H); ctx.clip(); ctx.drawImage(img, 0, 0); ctx.restore();
     if (scanP > 0 && scanP < 1) { const x = W * 0.62 * scanP; ctx.fillStyle = C.acc; ctx.fillRect(x - 1, 90, 2, H - 180); } }
   // field on: once assembled, the gaps between the plates light up with field lines and drifting charge
-  { const fp = tw(t, s(44.4), s(45.2), E.ioC) * (1 - tw(t, s(47.6), s(48.1))); if (fp > 0) {
-    const pl = D3.parts.filter(q => q.kind === 'plate'), at3 = (q, x, fy, fz) => project([x, lerp(q.box.min.y, q.box.max.y, fy), lerp(q.box.min.z, q.box.max.z, fz)], q);
-    ctx.save(); ctx.lineCap = 'round';
-    for (let k = 0; k < pl.length - 1; k++) { const a = pl[k], b = pl[k + 1], br = 0.5 + 0.5 * Math.sin(t * 4 + k * 1.3);
-      // glow filling the gap
-      const q = [at3(a, a.box.max.x, 0.06, 0.5), at3(b, b.box.min.x, 0.06, 0.5), at3(b, b.box.min.x, 0.94, 0.5), at3(a, a.box.max.x, 0.94, 0.5)];
-      ctx.fillStyle = rgba(C.acc, fp * (0.14 + 0.1 * br)); ctx.beginPath(); q.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill();
-      for (let m = 0; m < 7; m++) { const fy = 0.1 + m * 0.133, p0 = at3(a, a.box.max.x, fy, 0.5), p1 = at3(b, b.box.min.x, fy, 0.5);
-        const fl = 0.5 + 0.5 * Math.sin(t * 7 + k * 1.7 + m * 0.9);
-        ctx.strokeStyle = rgba(C.acc, fp * (0.55 + 0.35 * fl)); ctx.lineWidth = 2.2; ctx.setLineDash([7, 6]); ctx.lineDashOffset = -t * 40; seg(ctx, p0[0], p0[1], p1[0], p1[1], 1);
-        const u = (t * 0.8 + hash(k * 7 + m)) % 1, to = m % 2 ? p0 : p1, e = E.inC(u);   // a charged speck pulled from mid-gap onto a plate
-        const x = lerp((p0[0] + p1[0]) / 2, to[0], e), y = lerp((p0[1] + p1[1]) / 2, to[1], e);
-        ctx.setLineDash([]); ctx.fillStyle = rgba('#FF6A00', fp * (1 - u * u)); ctx.beginPath(); ctx.arc(x, y, 3, 0, TAU); ctx.fill(); } }
-    ctx.restore(); } }
+  fieldFX(ctx, t, tw(t, s(44.4), s(45.2), E.ioC) * (1 - tw(t, s(47.6), s(48.1))));
   // right column
   const rx = 1180;
   kicker(ctx, rx, 170, '04 — THE DEVICE', t, s(36));
@@ -606,6 +618,45 @@ function sEnd(ctx, t) {
   if (!EDIT.LONG) txt(ctx, '專題生 陳睿瑀 · 李恩 · 林子鈞', cx, 932, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.5, t0 + 2.05));
 }
 
+
+// ================================================================ long cut: news opener and chapter cards
+function sLNews(ctx, t) {
+  // each report gets the full frame for a few seconds, then all four settle into one list
+  const items = [
+    ['2020 · 美國 西雅圖', ['輪胎化學物質 6PPD-quinone', '被證實造成城市溪流銀鮭大量死亡'], 'KUOW Public Radio, 2020.12.04；Tian et al., Science, 2021'],
+    ['2022 · 中國 華南', ['已在人體尿液中檢出', '6PPD 與 6PPD-Q'], 'Du et al., Environ. Sci. Technol. Lett., 2022'],
+    ['2024 · 歐盟', ['Euro 7 首度將輪胎磨耗', '納入車輛排放法規'], 'Regulation (EU) 2024/1257；Pew Charitable Trusts, 2024.03.14'],
+    ['2026 · 台灣', ['學者建議針對輪胎磨損等陸源排放', '制定塑膠微粒減量政策'], '中央通訊社, 2026.01.25'],
+  ];
+  kicker(ctx, 140, 170, '01 — IN THE NEWS', t, 0);
+  const ONE = 3, LIST = items.length * ONE;
+  if (t < LIST) {
+    const i = clamp(Math.floor(t / ONE), 0, items.length - 1), u = t - i * ONE, out = 1 - tw(u, ONE - 0.35, ONE), [d, h, src] = items[i];   // t < 0 while the previous page wipes off
+    txt(ctx, `${i + 1} / ${items.length}`, W - 140, 170, fM(500, 22), C.mute, 'right', out, 3);
+    txt(ctx, d, 140, 420, fM(500, 30), C.acc, 'left', tw(u, 0.05, 0.4) * out, 4);
+    ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; seg(ctx, 140, 450, 140 + 120 * tw(u, 0.1, 0.6, E.ioC), 450); ctx.restore();
+    h.forEach((l, j) => reveal(ctx, l, 140, 560 + j * 96, { t: u, t0: 0.2 + j * 0.35, font: fS(900, 72), size: 72, color: j ? C.acc : C.ink, stagger: 0.025, alpha: out }));
+    txt(ctx, '資料來源：' + src, 142, 800, fS(700, 22), C.mute, 'left', tw(u, 0.9, 1.4) * out);
+    return;
+  }
+  const u = t - LIST;
+  items.forEach(([d, h, src], i) => { const t0 = i * 0.12, p = tw(u, t0, t0 + 0.5, E.outC), y = 330 + i * 150 + (1 - p) * 30;
+    ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50); ctx.restore();
+    txt(ctx, d, 170, y - 10, fM(500, 22), C.acc, 'left', p, 3);
+    txt(ctx, h[0] + ([' ', ' ', '', '，'][i]) + h[1], 170, y + 36, fS(900, 38), C.ink, 'left', p);   // re-join the two card lines as one sentence
+    txt(ctx, '資料來源：' + src, 172, y + 76, fS(700, 20), C.mute, 'left', p); });
+  bullet(ctx, 140, 940, tw(u, 0.7, 1.1));
+  reveal(ctx, '這些報導，都與輪胎磨損微粒有關', 170, 940, { t: u, t0: 0.8, font: fS(900, 34), size: 34, color: C.acc, stagger: 0.025 });
+}
+function sChapter(ctx, t, key) {
+  const [n, name] = CHAPTERS[key];
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const p = tw(t, 0.05, 0.5, E.outC);
+  txt(ctx, n, W / 2, 470, fM(600, 64), C.acc, 'center', p, 8);
+  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, W / 2 - 60 * p, 510, W / 2 + 60 * p, 510); ctx.restore();
+  reveal(ctx, name, W / 2, 600, { t, t0: 0.15, font: fS(900, 56), size: 56, align: 'center', stagger: 0.04 });
+}
+
 // ================================================================ long promo scenes (each on its own clock: t = seconds into the scene)
 function checkMark(ctx, x, y, sz, p, col = C.acc) { if (p <= 0) return; ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   poly(ctx, [[x - sz * 0.5, y], [x - sz * 0.12, y + sz * 0.38], [x + sz * 0.55, y - sz * 0.45]], p); ctx.restore(); }
@@ -636,6 +687,7 @@ function sTyre(ctx, t) {
     reveal(ctx, l, 1246, 490 + i * 64, { t, t0, font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.02 }); });
   bullet(ctx, 140, 790, tw(t, s(4.3), s(4.7)));
   reveal(ctx, '本專題著重於實體機構設計與機電系統整合', 170, 790, { t, t0: s(4.4), font: fS(900, 36), size: 36, color: C.acc, stagger: 0.025 });
+  cite(ctx, t, 'Cheng et al., WIPO Patent WO2021152331A1, 2021；Imperial College London, 2020', s(2.6));
 }
 
 // 02 — our approach: the features the rest of the film demonstrates
@@ -880,8 +932,107 @@ function sTeam(ctx, t) {
   txt(ctx, '中原大學化學系 蔡祐輔 教授　提供 Bruker micrOTOF II 高解析質譜儀', 220, 876, fS(700, 24), C.ink2, 'left', tw(t, s(4), s(4.5)));
 }
 
+// ================================================================ trailer (letterboxed 2.39:1; each shot on its own clock)
+const LB = 138, CY = H / 2;   // letterbox bar height, frame centre
+const dateCard = (ctx, t, year, place, x = 260, y = 330) => {
+  txt(ctx, year, x, y, fM(600, 40), C.acc, 'left', tw(t, s(0.2), s(0.8)), 4);
+  txt(ctx, place, x + 150, y - 2, fS(700, 32), C.ink2, 'left', tw(t, s(0.5), s(1.1)), 6);
+  ctx.save(); ctx.strokeStyle = C.dim; ctx.lineWidth = 1; seg(ctx, x, y + 26, x + 360, y + 26, tw(t, s(0.4), s(1.4), E.ioC)); ctx.restore();
+};
+const source = (ctx, t, str, t0, y = 870) => txt(ctx, str, W / 2, y, fM(500, 18), C.mute, 'center', tw(t, t0, t0 + 0.6), 2);
+function typeLines(ctx, lines, x, y, lh, t, t0, font, color, cps = 22) {   // typewriter over several lines; returns when it finishes
+  let ts = t0; lines.forEach((l, i) => { type(ctx, l, x, y + i * lh, t, ts, font, color, cps, i === lines.length - 1 || t < ts + [...l].length / cps); ts += [...l].length / cps + 0.15; }); return ts;
+}
+
+function sTOpen(ctx, t) {
+  for (let i = 0; i < 160; i++) { const sp = 900 + hash(i) * 500, x0 = hash(i * 3.1) * (W + 300), y = ((t * sp + hash(i * 7.3) * 900) % (H - 2 * LB + 200)) + LB - 100;
+    ctx.strokeStyle = rgba(C.ink, 0.06 + 0.1 * hash(i * 5.5)); ctx.lineWidth = 1; seg(ctx, x0 - y * 0.18, y, x0 - y * 0.18 - 10, y + 46); }
+  ctx.save(); ctx.strokeStyle = rgba(C.ink2, 0.5 * tw(t, s(0.5), s(3))); ctx.lineWidth = 1.5; seg(ctx, 0, 880, W, 880); ctx.restore();
+  { const x = ((t * 420) % (W + 600)) - 300, p = tw(t, s(0.3), s(1.5)); ctx.save(); ctx.globalAlpha = 0.5 * p; ctx.strokeStyle = C.ink2; ctx.lineWidth = 2; arc(ctx, x, 880 - 120, 120, PI * 1.05, PI * 1.95, 1); ctx.restore(); }
+  txt(ctx, '2020 年 12 月', W / 2, 500, fS(700, 40), C.ink2, 'center', tw(t, s(1.5), s(2.6)), 6);
+  txt(ctx, '美國　西雅圖', W / 2, 590, fS(900, 64), C.ink, 'center', tw(t, s(2.4), s(3.6)), 12);
+}
+
+function sTNews1(ctx, t) {
+  txt(ctx, 'NEWS · KUOW · 2020.12.04', 260, 330, fM(500, 20), C.acc, 'left', tw(t, s(0.2), s(0.8)), 4);
+  const end = typeLines(ctx, ["Scientists pinpoint chemical that's been killing", 'coho salmon. It comes from car tires.'], 260, 470, 84, t, s(0.6), fS(700, 60), C.ink, 26);
+  reveal(ctx, '科學家找出長年造成銀鮭死亡的化學物質，它來自汽車輪胎', 262, 690, { t, t0: end + 0.3, font: fS(700, 34), size: 34, color: C.ink2, stagger: 0.025 });
+  source(ctx, t, '原文標題 · KUOW Public Radio（Seattle）', end + 0.8);
+}
+
+function sTSalmon(ctx, t) {
+  // a coho outline that slowly loses colour and sinks
+  const sink = tw(t, s(2.5), s(7.5), E.ioC), fx = 600, fy = 520 + 70 * sink, dp = tw(t, s(0.2), s(1.8), E.ioC);
+  ctx.save(); ctx.translate(fx, fy); ctx.rotate(0.25 * sink); ctx.strokeStyle = lerpHex(C.acc, C.dim, sink); ctx.lineWidth = 2.5;
+  const body = []; for (let k = 0; k <= 40; k++) { const u = k / 40, a = u * TAU; body.push([Math.cos(a) * 190 - 20, Math.sin(a) * 62 * (1 - 0.35 * Math.cos(a))]); }
+  poly(ctx, body, dp, true); poly(ctx, [[-205, 0], [-300, -62], [-280, 0], [-300, 62], [-205, 0]], dp);
+  poly(ctx, [[10, -58], [50, -96], [80, -55]], dp); ctx.beginPath(); ctx.arc(130, -12, 6, 0, TAU); ctx.stroke(); ctx.restore();
+  txt(ctx, '40–90%', 1000, 540, fM(600, 150), C.acc, 'left', tw(t, s(0.8), s(1.6)));
+  reveal(ctx, '部分城市溪流中，', 1004, 630, { t, t0: s(1.6), font: fS(700, 36), size: 36, color: C.ink2, stagger: 0.03 });
+  reveal(ctx, '返鄉銀鮭在產卵前死亡', 1004, 684, { t, t0: s(2.1), font: fS(700, 36), size: 36, color: C.ink2, stagger: 0.03 });
+  source(ctx, t, '6PPD-quinone · Tian et al., Science, 2021', s(3));
+}
+
+function sTUrine(ctx, t) {
+  dateCard(ctx, t, '2022', '中國　華南');
+  reveal(ctx, '已在人體尿液中檢出', 260, 540, { t, t0: s(0.8), font: fS(900, 84), size: 84, stagger: 0.05 });
+  reveal(ctx, '6PPD 與 6PPD-Q', 260, 650, { t, t0: s(1.6), font: fM(600, 72), size: 72, color: C.acc, stagger: 0.04 });
+  source(ctx, t, 'Du et al., Environ. Sci. Technol. Lett., 2022', s(2.6));
+}
+
+function sTEU(ctx, t) {
+  dateCard(ctx, t, '2024', '歐盟');
+  reveal(ctx, 'Euro 7 首度將輪胎磨耗', 260, 500, { t, t0: s(0.8), font: fS(900, 72), size: 72, stagger: 0.04 });
+  reveal(ctx, '納入車輛排放法規', 260, 600, { t, t0: s(1.4), font: fS(900, 72), size: 72, color: C.acc, stagger: 0.05 });
+  txt(ctx, '“EU’s First-of-Its-Kind Legislation to Tackle Microplastics Emissions From Tyres”', 262, 690, fS(700, 26), C.ink2, 'left', tw(t, s(2.4), s(3)));
+  for (let k = 0; k < 48; k++) { const x = 260 + k * 30, p = tw(t, s(0.4) + k * 0.02, s(0.8) + k * 0.02); ctx.save(); ctx.globalAlpha = 0.35 * p; ctx.strokeStyle = C.ink2; ctx.lineWidth = 2; seg(ctx, x, 780, x + 14, 760); ctx.restore(); }
+  source(ctx, t, 'Pew Charitable Trusts · 2024.03.14 ／ Regulation (EU) 2024/1257', s(3));
+}
+
+function sTTaiwan(ctx, t) {
+  dateCard(ctx, t, '2026', '台灣');
+  txt(ctx, 'NEWS · 中央社 · 2026.01.25', 260, 410, fM(500, 20), C.acc, 'left', tw(t, s(0.6), s(1.2)), 4);
+  const end = typeLines(ctx, ['陸地才是大氣塑膠微粒主來源', '學者籲擬精準減塑政策'], 260, 520, 90, t, s(1), fS(900, 64), C.ink, 9);
+  reveal(ctx, '報導中，學者建議針對輪胎磨損等陸源排放制定減量政策', 262, 720, { t, t0: end + 0.2, font: fS(700, 30), size: 30, color: C.ink2, stagger: 0.02 });
+  source(ctx, t, '原文標題 · 中央通訊社', end + 0.6);
+}
+
+function sTTurn(ctx, t) {
+  reveal(ctx, '這些報導，', W / 2, 470, { t, t0: s(0.3), font: fS(700, 44), size: 44, align: 'center', color: C.ink2, stagger: 0.05 });
+  reveal(ctx, '都指向同一個來源', W / 2, 540, { t, t0: s(1.2), font: fS(700, 44), size: 44, align: 'center', color: C.ink2, stagger: 0.05 });
+  const p = tw(t, s(3), s(3.6)); if (p > 0) { ctx.save(); ctx.globalAlpha = p; ctx.translate(W / 2, 680); ctx.scale(0.9 + 0.1 * p, 0.9 + 0.1 * p); txt(ctx, '輪胎', 0, 0, fS(900, 110), C.acc, 'center', 1, 20); ctx.restore(); }
+}
+
+function sTMontage(ctx, t) {
+  const cut = B(4), k = Math.min(4, Math.floor(t / cut)), u = t - k * cut, cap = (a, b) => { txt(ctx, a, 260, 820, fS(900, 30), C.ink, 'left', tw(u, 0.1, 0.4)); txt(ctx, b, 260, 862, fS(700, 22), C.mute, 'left', tw(u, 0.2, 0.5)); };
+  if (u < 0.06) { ctx.fillStyle = rgba(C.acc, 0.25 * (1 - u / 0.06)); ctx.fillRect(0, 0, W, H); }
+  if (k === 0) { setPose({ cart: 1, dust: 1, plates: [1, 1, 1, 1], pull: 0, drawP: 1, az: lerp(30, 70, u / cut), el: 18, dist: 1050, offX: 0, lookY: 0 }); const img = render('solid'), c = project([0, 0, 0]);
+    ctx.save(); ctx.translate(1180 - c[0], CY - 10 - c[1]); ctx.drawImage(img, 0, 0); fieldFX(ctx, t, tw(u, 0.4, 1)); ctx.restore(); cap('主動式高壓靜電集塵模組', '不需濾網 · 以電場吸附導電微粒'); }
+  else if (k === 1) { const x0 = 560, x1 = 1360; for (let j = 0; j < 9; j++) { const y = 400 + j * 34, fl = 0.5 + 0.5 * Math.sin(t * 8 + j); ctx.save(); ctx.strokeStyle = rgba(C.acc, 0.3 + 0.4 * fl); ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * 60; seg(ctx, x0, y, x1, y); ctx.restore(); }
+    ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; seg(ctx, x0 - 20, 380, x0 - 20, 690); seg(ctx, x1 + 20, 380, x1 + 20, 690); ctx.restore();
+    txt(ctx, '15 kV', W / 2, 600, fM(600, 200), C.ink, 'center', tw(u, 0.05, 0.3)); cap('直流高壓電場', '平行銅片極板 · 間距 17 mm'); }
+  else if (k === 2) { txt(ctx, '0.72%', 700, 590, fM(600, 110), C.mute, 'right', tw(u, 0.05, 0.3)); txt(ctx, '→', W / 2 - 120, 580, fM(500, 90), C.ink2, 'center', tw(u, 0.3, 0.5));
+    if (u > 0.5) counter(ctx, 16.29 * tw(u, 0.5, 1.6, E.outExpo), 2, 900, 600, 150, C.acc, '%', C.ink); cap('靜態測試', '開啟 15 kV 後，捕捉效率提升約 22 倍'); }
+  else if (k === 3) { tireLine(ctx, 620, 540, 200, -t * 9, u, -1, 0.3); txt(ctx, '≈', 920, 600, fM(500, 100), C.acc, 'left', tw(u, 0.1, 0.4)); counter(ctx, 27.6 * tw(u, 0.2, 1.3, E.outExpo), 0, 990, 600, 180, C.acc, '%', C.ink);
+    cap('動態測試', '輪轂馬達 350 RPM · 三次測試平均捕捉效率'); }
+  else { ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, 400, 700, 1000, 700); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; for (const [dx, h] of [[120, 260], [260, 70], [400, 26], [520, 10]]) seg(ctx, 400 + dx, 700, 400 + dx, 700 - h * tw(u, 0.1, 0.8, E.outC)); ctx.restore();
+    txt(ctx, '2.98', 1120, 600, fM(600, 150), C.acc, 'left', tw(u, 0.3, 0.6)); txt(ctx, 'ppm', 1500, 600, fM(500, 48), C.ink, 'left', tw(u, 0.4, 0.7)); cap('質譜比對', '樣本訊號與 6PPD 相近，仍待標準品確認'); }
+}
+
+function sTTitle(ctx, t) {
+  const cx = W / 2, p0 = tw(t, s(0.3), s(1.4), E.ioC);
+  ctx.save(); ctx.globalAlpha = p0; ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; rr(ctx, cx - 50, 250, 100, 100, 20); ctx.stroke();
+  for (const k of [-1, 0, 1]) { if (k === 0) { ctx.fillStyle = C.acc; ctx.fillRect(cx - 7, 268, 14, 64); } else ctx.strokeRect(cx - 5 + k * 26, 268, 10, 64); } ctx.restore();
+  reveal(ctx, 'TRWP', cx, 520, { t, t0: s(0.8), font: fM(600, 150), size: 150, align: 'center', ls: 36, stagger: 0.08 });
+  reveal(ctx, '主動式輪胎磨損微粒靜電捕捉裝置', cx, 610, { t, t0: s(1.8), font: fS(700, 38), size: 38, align: 'center', color: C.ink2, stagger: 0.03 });
+  reveal(ctx, '為非廢氣排放提供硬體解決方案', cx, 690, { t, t0: s(3), font: fS(900, 42), size: 42, align: 'center', color: C.acc, stagger: 0.04 });
+  txt(ctx, '中原大學機械工程學系　指導教授 杜哲怡', cx, 800, fS(700, 22), C.mute, 'center', tw(t, s(4.6), s(5.4)), 4);
+  txt(ctx, '陳睿瑀　　李恩　　林子鈞', cx, 840, fS(700, 22), C.mute, 'center', tw(t, s(5), s(5.8)), 6);
+}
+
 // ------------------------------------------------------------ transitions
-const CUTS = Object.values(CUT).filter(b => b > 0).map(b => B(b));
+const FADE = new Set(Object.keys(CHAPTERS).filter(k => k in CUT).flatMap(k => { const i = EDIT.ORDER.indexOf(k); return [B(CUT[k]), B(CUT[EDIT.ORDER[i + 1]])]; }));
+const CUTS = Object.values(CUT).filter(b => b > 0).map(b => B(b)).filter(c => !FADE.has(c));
 const HW = 0.3;
 const wipeX = (t, tc) => W * E.ioC(P(t, tc - HW, tc + HW));
 // run a scene on its own authored clock (see CLOCK in music.js)
@@ -895,7 +1046,10 @@ function sDeviceIn(ctx, t) {
 }
 const FN = { intro: sIntro, problemA: sProblemA, problemB: sProblemB, ppd: sPPD, limits: sLimits, physics: sPhysics, rig: sRig, device: sDeviceIn, safety: sSafety,
   stat: sStatic, dyn: sDynamic, spec: sSpec, end: sEnd, tyre: sTyre, approach: sApproach, charge: sCharge, build: sBuild, method: sMethod, imaging: sImaging,
-  envelope: sEnvelope, dynres: sDynRes, future: sFuture, apps: sApps, team: sTeam };
+  envelope: sEnvelope, dynres: sDynRes, future: sFuture, apps: sApps, team: sTeam,
+  tOpen: sTOpen, tNews1: sTNews1, tSalmon: sTSalmon, tUrine: sTUrine, tEU: sTEU, tTaiwan: sTTaiwan, tTurn: sTTurn, tMontage: sTMontage };
+if (EDIT.TRAILER) FN.end = sTTitle;
+FN.lnews = sLNews; for (const k of Object.keys(CHAPTERS)) FN[k] = (ctx, t) => sChapter(ctx, t, k);
 const SCENES = EDIT.ORDER.map((n, i) => [B(CUT[n]), i + 1 < EDIT.ORDER.length ? B(CUT[EDIT.ORDER[i + 1]]) : DUR + 0.3, on(n, FN[n])]);
 function scanLine(ctx, t) {
   for (const tc of CUTS) { if (t < tc - HW || t > tc + HW) continue; const x = wipeX(t, tc);
@@ -917,14 +1071,26 @@ function hud(ctx, t) {
   const mx = rx0 + (rx1 - rx0) * t / DUR; ctx.fillStyle = C.acc; ctx.beginPath(); ctx.moveTo(mx, ry + 3); ctx.lineTo(mx - 7, ry + 15); ctx.lineTo(mx + 7, ry + 15); ctx.closePath(); ctx.fill();
   ctx.restore();
 }
+function drawTrailer(ctx, t) {
+  ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, W, H);
+  for (const [a, b, fn] of SCENES) { if (t < a || t >= b) continue;
+    const z = 1 + 0.025 * P(t, a, b); ctx.save(); ctx.translate(W / 2, CY); ctx.scale(z, z); ctx.translate(-W / 2, -CY); fn(ctx, t); ctx.restore(); }
+  for (const [a] of SCENES) if (a > 0) { const d = Math.abs(t - a); if (d < 0.28) { ctx.fillStyle = `rgba(0,0,0,${1 - d / 0.28})`; ctx.fillRect(0, 0, W, H); } }   // dip through black at each cut
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, LB); ctx.fillRect(0, H - LB, W, LB);
+  if (t < 0.6) { ctx.fillStyle = `rgba(0,0,0,${1 - t / 0.6})`; ctx.fillRect(0, 0, W, H); }
+  if (t > DUR - 1) { ctx.fillStyle = `rgba(0,0,0,${E.inC(P(t, DUR - 1, DUR))})`; ctx.fillRect(0, 0, W, H); }
+}
 export function drawFrame(ctx, t) {
+  if (EDIT.TRAILER) return drawTrailer(ctx, t);
   background(ctx, t);
   for (const [a, b, fn] of SCENES) {
-    const inStart = a === 0 ? -1 : a - HW, outEnd = b >= DUR ? 1e9 : b + HW; if (t < inStart || t > outEnd) continue;
-    const Lx = t > b - HW && b < DUR ? wipeX(t, b) : 0, Rx = t < a + HW && a > 0 ? wipeX(t, a) : W; if (Rx - Lx < 1) continue;
+    const fa = FADE.has(a), fb = FADE.has(b);
+    const inStart = a === 0 ? -1 : fa ? a : a - HW, outEnd = b >= DUR ? 1e9 : fb ? b : b + HW; if (t < inStart || t >= outEnd) continue;
+    const Lx = !fb && t > b - HW && b < DUR ? wipeX(t, b) : 0, Rx = !fa && t < a + HW && a > 0 ? wipeX(t, a) : W; if (Rx - Lx < 1) continue;
     ctx.save(); ctx.beginPath(); ctx.rect(Lx, 0, Rx - Lx, H); ctx.clip(); fn(ctx, t); ctx.restore();
   }
   scanLine(ctx, t); hud(ctx, t);
+  for (const c of FADE) { const d = Math.abs(t - c); if (d < 0.3) { ctx.fillStyle = `rgba(0,0,0,${1 - d / 0.3})`; ctx.fillRect(0, 0, W, H); } }
   if (t < 0.3) { ctx.fillStyle = `rgba(0,0,0,${1 - t / 0.3})`; ctx.fillRect(0, 0, W, H); }
   if (t > DUR - 0.5) { ctx.fillStyle = `rgba(0,0,0,${E.inC(P(t, DUR - 0.5, DUR))})`; ctx.fillRect(0, 0, W, H); }
 }

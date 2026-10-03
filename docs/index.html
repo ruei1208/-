@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主動式輪胎磨損微粒(TRWP)靜電捕捉裝置｜實作組-6</title>
+<meta name="description" content="以 15 kV 直流靜電場主動捕集輪胎與路面磨損微粒之車載模組 — 中原大學機械工程學系專題成果。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tailwind.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-base text-ink font-sans antialiased">
+
+<header id="nav" class="fixed inset-x-0 top-0 z-50 transition-colors">
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+    <a href="#hero" class="flex items-center gap-2 font-semibold tracking-wide"><span class="logo-dot"></span><span data-bind="meta.short"></span></a>
+    <nav class="hidden lg:block"><ul id="navlinks" class="flex gap-1 text-sm"></ul></nav>
+    <button id="menuBtn" class="lg:hidden rounded-md p-2 text-silver" aria-label="開啟選單" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <div id="mobileMenu" class="lg:hidden hidden border-t border-edge bg-base/95 backdrop-blur"><ul id="navlinksM" class="mx-auto max-w-6xl px-5 py-3 text-base"></ul></div>
+</header>
+
+<main>
+  <!-- 1 Hero -->
+  <section id="hero" class="relative flex min-h-[100svh] items-center overflow-hidden">
+    <canvas id="field" class="absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
+    <div class="hero-fade absolute inset-0"></div>
+    <div class="relative mx-auto w-full max-w-6xl px-5 pt-24 pb-16">
+      <p class="reveal mb-5 inline-flex items-center gap-2 rounded-full border border-edge bg-card/60 px-3 py-1 text-xs text-sub"><span class="h-1.5 w-1.5 rounded-full bg-amber"></span><span data-bind="meta.group"></span> · <span data-bind="meta.school"></span></p>
+      <p class="reveal mb-3 font-mono text-xs uppercase tracking-[0.18em] text-voltl" data-bind="hero.kicker"></p>
+      <h1 class="reveal text-[2rem] font-black leading-tight sm:text-5xl lg:text-6xl" data-bind="hero.title"></h1>
+      <p class="reveal mt-6 max-w-2xl text-base leading-relaxed text-sub sm:text-lg" data-bind="hero.summary"></p>
+      <div class="reveal mt-9 flex flex-wrap items-center gap-4">
+        <a href="#motivation" class="btn-primary"><span data-bind="hero.cta"></span> <span aria-hidden="true">→</span></a>
+        <a href="#results" class="btn-ghost">初步成果</a>
+      </div>
+      <dl id="heroFacts" class="reveal mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-edge bg-edge sm:grid-cols-4"></dl>
+    </div>
+  </section>
+
+  <!-- 2 Motivation -->
+  <section id="motivation" class="sec bg-alt">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">01</p><h2>研究動機<span>Motivation</span></h2></div>
+      <div class="grid gap-10 lg:grid-cols-5">
+        <div class="lg:col-span-3 reveal">
+          <h3 class="sub-h" data-bind="motivation.impactTitle"></h3>
+          <div id="impact" class="prose-c space-y-4"></div>
+        </div>
+        <figure class="lg:col-span-2 reveal" id="motFig"></figure>
+      </div>
+      <div id="motStats" class="mt-12 grid gap-4 sm:grid-cols-3"></div>
+      <h3 class="sub-h mt-16 reveal" data-bind="motivation.whyTitle"></h3>
+      <div id="why" class="grid gap-4 md:grid-cols-3"></div>
+      <p class="reveal mt-6 text-sm leading-relaxed text-sub" data-bind="motivation.note"></p>
+      <div class="mt-12 reveal">
+        <p class="mb-4 font-mono text-xs uppercase tracking-[0.16em] text-sub">UN Sustainable Development Goals <span data-bind="motivation.sdgSource"></span></p>
+        <div id="sdgs" class="grid gap-4 sm:grid-cols-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 System -->
+  <section id="system" class="sec">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">02</p><h2>系統架構<span>System Architecture</span></h2></div>
+      <p class="reveal max-w-3xl leading-relaxed text-sub" data-bind="system.intro"></p>
+      <div class="reveal mt-10 rounded-2xl border border-edge bg-card/50 p-5 sm:p-7">
+        <p class="diag-label"><span class="dot bg-amber"></span>高壓電力路徑 Power Path</p>
+        <div id="powerFlow" class="flow"></div>
+        <p class="diag-label mt-7"><span class="dot bg-volt"></span>控制訊號路徑 Signal Path</p>
+        <div id="signalFlow" class="flow"></div>
+      </div>
+      <div id="parts" class="mt-12 grid gap-5 md:grid-cols-2"></div>
+      <div class="mt-16 grid gap-8 lg:grid-cols-2">
+        <div class="reveal">
+          <h3 class="sub-h" data-bind="system.safety.title"></h3>
+          <div class="table-wrap"><table class="tbl" id="safetyTbl"></table></div>
+          <p class="mt-3 text-sm text-sub" data-bind="system.safety.note"></p>
+        </div>
+        <div id="safetyFigs" class="grid gap-5 reveal"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Experiments -->
+  <section id="experiments" class="sec bg-alt">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">03</p><h2>實驗與分析<span>Experiments &amp; Analysis</span></h2></div>
+      <p class="reveal max-w-3xl leading-relaxed text-sub" data-bind="experiments.intro"></p>
+      <div class="reveal mt-10">
+        <div id="tabBar" class="tab-bar" role="tablist"></div>
+        <div id="tabPanels" class="mt-8"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Results -->
+  <section id="results" class="sec">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">04</p><h2>初步成果、限制與未來工作<span>Preliminary Results, Limitations &amp; Future Work</span></h2></div>
+      <div id="resItems" class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"></div>
+      <div class="mt-14 grid gap-8">
+        <div class="reveal">
+          <h3 class="sub-h">質譜鑑定 <span class="en">Mass Spectrometry</span></h3>
+          <div class="table-wrap"><table class="tbl" id="msTbl"></table></div>
+          <p class="mt-3 text-sm text-sub" data-bind="results.msTable.note"></p>
+        </div>
+        <div id="msFigs" class="grid gap-5 sm:grid-cols-2 reveal"></div>
+      </div>
+      <div class="mt-16 grid gap-6 lg:grid-cols-2">
+        <div class="panel reveal"><h3 class="sub-h">研究限制 <span class="en">Limitations</span></h3><ul id="limits" class="list-c"></ul></div>
+        <div class="panel reveal"><h3 class="sub-h">未來工作 <span class="en">Future Work</span></h3><ol id="future" class="list-n"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Team -->
+  <section id="team" class="sec bg-alt">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">05</p><h2>團隊與指導教授<span>Team &amp; Advisor</span></h2></div>
+      <div id="advisor" class="reveal"></div>
+      <div id="members" class="mt-6 grid gap-5 md:grid-cols-3"></div>
+      <p class="reveal mt-8 text-sm text-sub"><span class="text-silver">致謝　</span><span data-bind="team.thanks"></span></p>
+    </div>
+  </section>
+
+  <!-- 7 References -->
+  <section id="references" class="sec">
+    <div class="wrap">
+      <div class="sec-head reveal"><p class="sec-no">06</p><h2>參考文獻<span>References</span></h2></div>
+      <ol id="refs" class="refs reveal"></ol>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-edge py-10 text-center text-xs text-sub">
+  <p data-bind="meta.title"></p>
+  <p class="mt-1"><span data-bind="meta.group"></span> · <span data-bind="meta.schoolEn"></span></p>
+</footer>
+
+<div id="lightbox" class="lightbox" hidden><button aria-label="關閉" class="lb-close">×</button><img alt=""><p></p></div>
+
+<script src="figures.js"></script>
+<script src="content.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
