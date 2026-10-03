@@ -114,3 +114,6 @@ figcaption { margin-top: .6rem; font-size: .8rem; line-height: 1.55; color: #9AA
 .lightbox p { max-width: 60rem; text-align: center; color: #C3C9D2; font-size: .9rem; }
 .lb-close { position: absolute; top: 1rem; right: 1.2rem; font-size: 2rem; color: #C9D1DB; line-height: 1; }
 .grid > * { min-width: 0; }
+.svgfig { border: 1px solid #2C333D; border-radius: .75rem; background: #171B21; padding: .6rem; }
+.svgfig svg { display: block; width: 100%; height: auto; }
+.svgfig text { font-family: Inter, "Noto Sans TC", sans-serif; }

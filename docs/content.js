@@ -4,6 +4,8 @@
  *  · 文字：直接修改引號內的內容。可用 <b>粗體</b>；[1]、[5][6] 會自動連到參考文獻。
  *  · 圖片：把圖檔上傳到 docs/images/，再把 src 改成 'images/檔名'。
  *          src 留空 ''，網站會顯示「待補」的虛線框。
+ *  · draw: '名稱' 的圖是網站自行繪製的向量圖（定義在 figures.js）；
+ *          要換成照片時，把 draw: '...' 改成 src: 'images/檔名' 即可。
  *  · 待補文字：以【待補】開頭的字串會顯示成虛線框，提醒尚未提供資料。
  *  · 資料來源：除特別標示外，內容皆引自書面報告 v29。
  * ===================================================================== */
@@ -43,7 +45,7 @@ window.SITE = {
       { v: '3–8%', k: '重型電動車非廢氣 PM2.5 較同級燃油車之增幅[3]' },
       { v: '53.5%', k: '全球乘用車非廢氣微粒排放至 2030 年之預估增幅[3]' },
     ],
-    figure: { src: 'images/microplastic-sources.jpg', caption: '全球初級微塑膠排放來源比例（圖片來源：中央研究院提供，引自中時新聞網[14]；原始數據：Boucher 與 Friot[4]）' },
+    figure: { draw: 'pie', caption: '全球初級微塑膠排放來源比例（依書面報告圖一重繪；原始數據：Boucher 與 Friot[4]，圖片出處：中時新聞網[14]）' },
     whyTitle: '為何需要主動式收集',
     why: [
       { t: '傳統物理濾網', d: '會對車輛行進造成額外風阻，容易堵塞，並影響電動車續航里程[9][10]。' },
@@ -66,20 +68,20 @@ window.SITE = {
     power: ['110 V AC 市電', '變壓器<br>110 V → 12 V', '保險絲 2 A', '手動開關', '繼電器<br>COM → NO', '升壓線圈<br>12 V → 15 kV', '銅板電極'],
     signal: ['雨滴感測器', 'Arduino Uno', '繼電器 IN'],
     parts: [
-      { icon: 'motor', t: '輪轂馬達平台', en: 'Hub Motor', d: '48 V 輪轂馬達帶動測試輪胎(直徑約 50 cm)摩擦砂紙產生粉塵；最高轉速 350 RPM，約相當於 33 km/h 等效車速。', img: 'images/hub-motor.jpg' },
-      { icon: 'power', t: '高壓電源', en: 'HV Power Supply', d: '110 V 轉 12 V 電源變壓器；12 V 輸出端依序串接 2 A 保險絲（過電流保護）與手動開關（人工總開關）。', img: 'images/components.jpg' },
-      { icon: 'coil', t: '升壓線圈', en: 'Step-up Coil', d: '12 V 轉 15 kV 之直流高壓發生器；高壓端子壓接後以尼龍柱與螺帽鎖於銅片上。輸出電壓依模組規格標示，尚未以高壓探棒實測。', img: '' },
-      { icon: 'plates', t: '銅板電極', en: 'Copper Plate Electrodes', d: '4 片平行銅片，極板間距 17 mm，以尼龍絕緣柱定距；外殼為 PLA 3D 列印，高壓接線端灌注熱熔膠絕緣封裝。', img: 'images/prototype.jpg' },
-      { icon: 'rain', t: '雨滴感測自動斷電', en: 'Rain-sensing Cut-off', d: '偵測到降雨時自動切斷高壓電場；停雨後須經延遲時間方重新供電，避免殘留水氣造成誤動作。', img: 'images/rain-breadboard.jpg' },
-      { icon: 'chip', t: 'Arduino 控制系統', en: 'Arduino Uno Control', d: '讀取雨滴感測器狀態並控制繼電器；採 NO 常開接點，Arduino 當機、斷電或訊號線鬆脫時高壓自動關閉(fail-safe)；手動開關具最高優先權。', img: 'images/rain-flow.png' },
+      { icon: 'motor', t: '輪轂馬達平台', en: 'Hub Motor', d: '48 V 輪轂馬達帶動測試輪胎(直徑約 50 cm)摩擦砂紙產生粉塵；最高轉速 350 RPM，約相當於 33 km/h 等效車速。', draw: 'hubMotor' },
+      { icon: 'power', t: '高壓電源', en: 'HV Power Supply', d: '110 V 轉 12 V 電源變壓器；12 V 輸出端依序串接 2 A 保險絲（過電流保護）與手動開關（人工總開關）。', draw: 'power' },
+      { icon: 'coil', t: '升壓線圈', en: 'Step-up Coil', d: '12 V 轉 15 kV 之直流高壓發生器；高壓端子壓接後以尼龍柱與螺帽鎖於銅片上。輸出電壓依模組規格標示，尚未以高壓探棒實測。', draw: 'coil' },
+      { icon: 'plates', t: '銅板電極', en: 'Copper Plate Electrodes', d: '4 片平行銅片，極板間距 17 mm，以尼龍絕緣柱定距；外殼為 PLA 3D 列印，高壓接線端灌注熱熔膠絕緣封裝。', draw: 'plates' },
+      { icon: 'rain', t: '雨滴感測自動斷電', en: 'Rain-sensing Cut-off', d: '偵測到降雨時自動切斷高壓電場；停雨後須經延遲時間方重新供電，避免殘留水氣造成誤動作。', draw: 'rainSensor' },
+      { icon: 'chip', t: 'Arduino 控制系統', en: 'Arduino Uno Control', d: '讀取雨滴感測器狀態並控制繼電器；採 NO 常開接點，Arduino 當機、斷電或訊號線鬆脫時高壓自動關閉(fail-safe)；手動開關具最高優先權。', draw: 'arduino' },
     ],
     safety: {
       title: '安全模組驗收結果',
       rows: [['開機（乾燥狀態）', '繼電器通電，15 kV 正常運作', '通過'], ['偵測到降雨', '繼電器即時斷電', '通過'], ['停雨後延遲復電', '延遲時間內維持斷電，屆滿後恢復供電', '通過'], ['手動開關關閉之優先權', '無論感測器狀態，強制斷電', '設計成立']],
       note: '已於麵包板環境下以 Arduino Uno 完成低壓功能驗證；第四項屬電路拓樸特性，以電路設計之正確性為驗證依據。',
       figures: [
-        { src: 'images/rain-circuit.png', caption: '雨滴感測器安全保護模組完整電路方塊圖' },
-        { src: 'images/relay-no-nc.png', caption: '繼電器 NO／NC 接點選用理由之邏輯示意' },
+        { draw: 'flow', caption: '雨滴感測安全模組之程式判斷流程' },
+        { draw: 'relay', caption: '繼電器 NO／NC 接點選用理由' },
       ],
     },
   },
@@ -98,19 +100,21 @@ window.SITE = {
         ],
       },
       {
-        key: 'matlab', t: 'MATLAB 圖表', en: 'MATLAB Plots',
-        text: '【待補】MATLAB 分析說明。下方暫放書面報告中的數據圖，若有 MATLAB 原始圖檔請替換。',
+        key: 'plots', t: '數據圖表', en: 'Data Plots',
+        text: '以下圖表依書面報告之量測數據重新繪製。',
         figures: [
-          { src: 'images/dynamic-mass.png', caption: '350 RPM 下各運轉時間三次測試之平均粉塵質量與捕捉裝置吸附質量（誤差棒為標準差；裝置位置：水平 25 cm）' },
-          { src: 'images/core-area.png', caption: '核心面積隨 (a) 懸停高度與 (b) 懸停時間之變化趨勢' },
-          { src: 'images/dust-envelope.png', caption: '粉塵雲上緣擴散包絡線與水平距離之關係（水平 30 cm 以內為示意）' },
+          { draw: 'staticEff', caption: '靜態捕捉效率各次量測值（電場關閉 n=3；開啟 15 kV n=5）' },
+          { draw: 'dynamicMass', caption: '350 RPM 下各運轉時間三次測試之平均粉塵質量與捕捉裝置吸附質量（裝置位置：水平 25 cm）' },
+          { draw: 'coreArea', caption: '核心面積隨 (a) 懸停高度與 (b) 懸停時間之變化趨勢' },
+          { draw: 'envelope', caption: '粉塵雲上緣擴散包絡線與水平距離之關係（水平 30 cm 以內為示意）' },
+          { draw: 'spread', caption: '粉塵擴散範圍俯視示意（擴散區域 0–73 cm，沉積量最多處 27 cm，寬約 21 cm）' },
         ],
       },
       {
         key: 'imagej', t: 'ImageJ 分析', en: 'ImageJ Analysis',
         text: '以開源影像分析軟體 ImageJ 對粉塵沉積圖案進行灰階閾值分割，量測核心面積、擴散半徑與質心偏移量，分別對應電場作用之強度、作用範圍與方向對稱性。以懸停高度 5 cm 為例，量得區域面積 45.999 cm²，擴散半徑取最大 Feret 直徑(8.109 cm)之一半。',
         figures: [
-          { src: 'images/imagej.png', caption: 'ImageJ 影像分析流程（左：原始沉積影像；右：二值化影像；下：量測結果，以懸停高度 5 cm 為例）' },
+          { draw: 'imagej', caption: 'ImageJ 影像分析流程示意（數值以懸停高度 5 cm 為例）' },
         ],
         table: { head: ['懸停高度 (cm)', '核心面積 (cm²)', '擴散半徑 (cm)', '質心偏移量 (cm)'], rows: [['1', '144.27', '7.38', '0.45'], ['3', '83.30', '6.50', '0.53'], ['5', '46.00', '4.05', '0.25']] },
         after: '核心面積與擴散半徑均隨懸停高度增加而遞減，高度由 1 cm 增至 5 cm 時核心面積減少約 68%，與 E = V/d 所預期之電場強度隨間距增加而衰減之趨勢一致。',
@@ -130,8 +134,8 @@ window.SITE = {
     ],
     msTable: { head: ['樣品', '來源', 'm/z 實測 (Da)', '質量誤差'], rows: [['樣品 1', '砂紙直接磨耗之輪胎粉塵（未經裝置）', '268.1926', '2.98 ppm'], ['樣品 2', '本裝置集塵盒所收集之粉塵', '268.1930', '1.49 ppm']], note: '6PPD(C₁₈H₂₄N₂) 理論精確質量 268.1934 Da。' },
     msFigures: [
-      { src: 'images/ms-sample1.png', caption: '樣品 1 質譜圖（上：全圖；下：m/z 268 附近放大並與 6PPD 理論同位素分布比對）' },
-      { src: 'images/ms-sample2.png', caption: '樣品 2 質譜圖（上：全圖；下：m/z 268 附近放大並與 6PPD 理論同位素分布比對）' },
+      { draw: 'ms1', caption: '樣品 1（砂紙直接磨耗之輪胎粉塵）m/z 268 附近與 6PPD 理論同位素分布比對；M+1 強度比以峰高估計' },
+      { draw: 'ms2', caption: '樣品 2（本裝置集塵盒收集之粉塵）m/z 268 附近比對；M+1 峰 269.1996 與理論值差距約 10.8 ppm' },
     ],
     limits: [
       '動態測試受限於輪轂馬達最高轉速(350 RPM)與變壓器負載能力，僅完成單一轉速測試，各條件僅重複三次。',

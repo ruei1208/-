@@ -10,7 +10,9 @@
   const cite = s => esc(s).replace(/\[(\d+)\]/g, (_, n) => `<a class="cite" href="#ref-${n}" data-ref="${n}">[${n}]</a>`);
   const txt = s => isTodo(s) ? `<span class="ph-inline">${s}</span>` : cite(s);
   const ph = label => `<div class="ph"><b>待補 PLACEHOLDER</b><span>${esc(label).replace('【待補】', '')}</span></div>`;
-  const fig = f => !f.src
+  const fig = f => f.draw && window.FIGS?.[f.draw]
+    ? `<figure><div class="svgfig">${window.FIGS[f.draw]()}</div><figcaption>${cite(f.caption)}</figcaption></figure>`
+    : !f.src
     ? `<figure>${ph(f.caption || '【待補】圖片')}</figure>`
     : `<figure><img src="${f.src}" alt="${esc(f.caption).replace(/<[^>]+>|"/g, '')}" loading="lazy" class="${f.dark ? 'dark' : ''}"><figcaption>${cite(f.caption)}</figcaption></figure>`;
   const table = (el, head, rows, cls = []) => {
@@ -60,7 +62,7 @@
       <div class="flex items-center gap-3"><span class="grid h-10 w-10 place-items-center rounded-lg border border-edge bg-alt text-voltl"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICON[p.icon] || ''}</svg></span>
       <div><h4 class="font-bold leading-tight">${p.t}</h4><p class="text-xs text-sub">${p.en}</p></div></div>
       <p class="mt-4 flex-1 text-sm leading-relaxed text-sub">${txt(p.d)}</p>
-      <div class="mt-4">${p.img ? `<figure><img src="${p.img}" alt="${p.t}" loading="lazy" class="aspect-[4/3] object-cover"></figure>` : ph('【待補】' + p.t + ' 照片')}</div></article>`).join('');
+      <div class="mt-4">${p.draw && window.FIGS?.[p.draw] ? `<div class="svgfig">${window.FIGS[p.draw]()}</div>` : p.img ? `<figure><img src="${p.img}" alt="${p.t}" loading="lazy" class="aspect-[4/3] object-cover"></figure>` : ph('【待補】' + p.t + ' 照片')}</div></article>`).join('');
   table($('#safetyTbl'), ['驗收項目', '預期結果', '結果'], S.system.safety.rows, ['', '', 'pass']);
   $('#safetyFigs').innerHTML = S.system.safety.figures.map(fig).join('');
 
