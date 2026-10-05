@@ -945,8 +945,8 @@ function sTeam(ctx, t) {
     reveal(ctx, n, x, 560, { t, t0: t0 + 0.2, font: fS(900, 48), size: 48, stagger: 0.06 });
     ls.forEach((l, j) => txt(ctx, l, x, 624 + j * 44, fS(700, 24), C.ink2, 'left', tw(t, t0 + 0.5 + j * 0.12, t0 + 1 + j * 0.12))); });
   ctx.save(); ctx.strokeStyle = C.line; ctx.lineWidth = 1; seg(ctx, 140, 820, 1780, 820, tw(t, s(3.4), s(4.2), E.ioC)); ctx.restore();
-  txt(ctx, '致謝', 140, 876, fS(900, 26), C.acc, 'left', tw(t, s(3.8), s(4.3)));
-  txt(ctx, '中原大學化學系 蔡祐輔 教授　提供 Bruker micrOTOF II 高解析質譜儀', 220, 876, fS(700, 24), C.ink2, 'left', tw(t, s(4), s(4.5)));
+  if (LANG !== 'en') txt(ctx, '致謝', 140, 876, fS(900, 26), C.acc, 'left', tw(t, s(3.8), s(4.3)));
+  if (LANG !== 'en') txt(ctx, '中原大學化學系 蔡祐輔 教授　提供 Bruker micrOTOF II 高解析質譜儀', 220, 876, fS(700, 24), C.ink2, 'left', tw(t, s(4), s(4.5)));
 }
 
 // ================================================================ trailer (letterboxed 2.39:1; each shot on its own clock)
