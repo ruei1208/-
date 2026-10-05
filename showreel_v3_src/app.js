@@ -1,5 +1,6 @@
 import { SYNC, B, CUT, BEAT, BEATS, DUR, clock } from './music.js';
 import { EDIT, CHAPTERS } from './edit.js';
+import { LANG, tr, pace } from './i18n.js';
 import { loadDevice, setPose, render, project, partCenter, D3 } from './device3d.js';
 
 export const W = 1920, H = 1080, FPS = 60;
@@ -45,7 +46,7 @@ function hatch(ctx, x, y, w, h, gap, color, p = 1, lw = 1) {
 function arrowHead(ctx, x, y, ang, s = 10) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - s * Math.cos(ang - 0.4), y - s * Math.sin(ang - 0.4)); ctx.moveTo(x, y); ctx.lineTo(x - s * Math.cos(ang + 0.4), y - s * Math.sin(ang + 0.4)); ctx.stroke(); }
 // engineering dimension line with arrowheads and label
 function dim(ctx, x1, y1, x2, y2, label, p, color = C.ink, off = 26, font = fM(500, 20)) {
-  if (p <= 0) return; const a = Math.atan2(y2 - y1, x2 - x1), nx = -Math.sin(a), ny = Math.cos(a);
+  if (p <= 0) return; label = tr(label); const a = Math.atan2(y2 - y1, x2 - x1), nx = -Math.sin(a), ny = Math.cos(a);
   ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
   const q = E.ioC(clamp(p * 1.4)); const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
   seg(ctx, mx, my, lerp(mx, x1, 1) , lerp(my, y1, 1), q); seg(ctx, mx, my, x2, y2, q);
@@ -61,23 +62,34 @@ function brackets(ctx, x, y, w, h, s, p, color = C.ink, lw = 2) {
   for (const [cx, cy, dx, dy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x + w, y + h, -1, -1], [x, y + h, 1, -1]]) poly(ctx, [[cx + dx * k, cy], [cx, cy], [cx, cy + dy * k]], 1);
   ctx.restore();
 }
+// English lines run longer than the Chinese they replace: shrink a line that would leave the frame
+function fit(ctx, str, font, x, align) {
+  if (LANG !== 'en') return 1;
+  ctx.save(); ctx.font = font; const w = ctx.measureText(str).width; ctx.restore();
+  const room = align === 'center' ? 2 * Math.min(x, W - x) - 160 : align === 'right' ? x - 60 : W - 60 - x;
+  return w > room ? room / w : 1;
+}
+const scaleFont = (font, k) => k === 1 ? font : font.replace(/([\d.]+)px/, (_, n) => (n * k).toFixed(1) + 'px');
 // masked per-glyph rise
 function reveal(ctx, str, x, y, o) {
+  const zh = [...str]; str = tr(str); const k = pace(zh, [...str]);
+  { const f = fit(ctx, str, o.font, x, o.align); if (f < 1) o = { ...o, font: scaleFont(o.font, f), size: o.size * f }; }
   const { t, t0 } = o; ctx.save(); ctx.font = o.font; if (o.ls) ctx.letterSpacing = o.ls + 'px';
   const chars = [...str], ws = chars.map(c => ctx.measureText(c).width), total = ws.reduce((a, b) => a + b, 0), size = o.size;
   let cx = o.align === 'center' ? x - total / 2 : o.align === 'right' ? x - total : x;
   ctx.beginPath(); ctx.rect(cx - 40, y - size * 1.1, total + 80, size * 1.45); ctx.clip();
-  chars.forEach((ch, i) => { const s = t0 + i * (o.stagger ?? 0.02); const p = E.outQuint(P(t, s, s + (o.dur ?? 0.7)));
+  chars.forEach((ch, i) => { const s = t0 + i * (o.stagger ?? 0.02) * k; const p = E.outQuint(P(t, s, s + (o.dur ?? 0.7)));
     if (p > 0.001) { ctx.globalAlpha = (o.alpha ?? 1) * clamp(p * 1.5); ctx.fillStyle = o.color || C.ink; ctx.fillText(ch, cx, y + (1 - p) * size * 0.9); } cx += ws[i]; });
   ctx.restore(); return total;
 }
 function type(ctx, str, x, y, t, t0, font, color, cps = 40, cursor = true) {
+  const zh = [...str]; str = tr(str); cps /= pace(zh, [...str]);
   const chars = [...str], n = Math.floor(clamp((t - t0) * cps, 0, chars.length)); if (t < t0) return;
   ctx.save(); ctx.font = font; ctx.fillStyle = color; const s = chars.slice(0, n).join(''); ctx.fillText(s, x, y);
   if (cursor && (n < chars.length || (t * 2.5) % 1 < 0.5)) { const w = ctx.measureText(s).width; ctx.fillRect(x + w + 3, y - 18, 10, 22); }
   ctx.restore();
 }
-function txt(ctx, s, x, y, font, color, align = 'left', alpha = 1, ls = 0) { if (alpha <= 0) return; ctx.save(); ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.globalAlpha = alpha; if (ls) ctx.letterSpacing = ls + 'px'; ctx.fillText(s, x, y); ctx.restore(); }
+function txt(ctx, s, x, y, font, color, align = 'left', alpha = 1, ls = 0) { if (alpha <= 0) return; s = tr(s); font = scaleFont(font, fit(ctx, s, font, x, align)); ctx.save(); ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.globalAlpha = alpha; if (ls) ctx.letterSpacing = ls + 'px'; ctx.fillText(s, x, y); ctx.restore(); }
 function digits(ctx, s, x, y, font, color) { ctx.save(); ctx.font = font; ctx.fillStyle = color; const cw = ctx.measureText('0').width; let cx = x;
   for (const ch of s) { const w = /[0-9]/.test(ch) ? cw : ctx.measureText(ch).width; ctx.fillText(ch, cx, y); cx += w; } ctx.restore(); return cx - x; }
 // source line for anything quoted from the literature: same place and style on every page
@@ -584,20 +596,25 @@ function sSpec(ctx, t) {                         // beats 68-72
   const x0 = 140, x1 = 1060, yc = 590, hh = 260, mz = m => x0 + (m - 267.8) / 4.6 * (x1 - x0);
   ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.2; seg(ctx, x0, yc, x1, yc, tw(t, vv(38), vv(38.7), E.ioC));
   for (let m = 268; m <= 272; m++) { seg(ctx, mz(m), yc - 8, mz(m), yc + 8, tw(t, vv(38.3), vv(38.7))); txt(ctx, String(m), mz(m), yc + 38, fM(500, 20), C.mute, 'center', tw(t, vv(38.3), vv(38.7))); } ctx.restore();
-  txt(ctx, '實測', x0, yc - hh - 30, fS(900, 26), C.acc, 'left', tw(t, vv(38.2), vv(38.6))); txt(ctx, '理論', x0, yc + hh + 50, fS(900, 26), C.ink2, 'left', tw(t, vv(38.2), vv(38.6)));
+  txt(ctx, '實測 · 樣品 2', x0, yc - hh - 30, fS(900, 26), C.acc, 'left', tw(t, vv(38.2), vv(38.6))); txt(ctx, '理論 · 6PPD', x0, yc + hh + 50, fS(900, 26), C.ink2, 'left', tw(t, vv(38.2), vv(38.6)));
   const curve = (list, sig, dir, grow) => { const pts = []; for (let px = x0; px <= x1; px += 2) { const m = 267.8 + (px - x0) / (x1 - x0) * 4.6; let v = 0; list.forEach(([c, h], i) => { v += h * spring(t - grow - i * 0.12, 1.8, 0.55) * Math.exp(-((m - c) ** 2) / (2 * sig * sig)); }); pts.push([px, yc + dir * v * hh]); } return pts; };
-  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2.4; poly(ctx, curve([[268.1926, 1], [269.1976, 0.33], [270.1992, 0.03], [271.1492, 0.02]], 0.022, -1, vv(38.4)), 1); ctx.restore();
-  ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]); poly(ctx, curve([[268.1934, 1], [269.1967, 0.19], [270.2, 0.02]], 0.11, 1, vv(38.6)), 1); ctx.restore();
-  txt(ctx, '268.1926', mz(268.19) + 18, yc - hh + 16, fM(600, 24), C.acc, 'left', tw(t, vv(39), vv(39.4)));
-  txt(ctx, '268.1934', mz(268.19) + 64, yc + hh - 20, fM(600, 24), C.ink, 'left', tw(t, vv(39.1), vv(39.5)));
+  // measured M+1 / M is about 1 for sample 2, against about 0.2 in theory (report 4.4); only M and M+1 are drawn
+  ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2.4; poly(ctx, curve([[268.1930, 1], [269.1996, 0.97]], 0.022, -1, vv(38.4)), 1); ctx.restore();
+  ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]); poly(ctx, curve([[268.1934, 1], [269.1967, 0.2]], 0.022, 1, vv(38.6)), 1); ctx.restore();
+  txt(ctx, '268.1930', mz(268.19) + 18, yc - hh + 16, fM(600, 24), C.acc, 'left', tw(t, vv(39), vv(39.4)));
+  txt(ctx, '269.1996', mz(269.2) + 18, yc - hh + 16, fM(600, 24), C.acc, 'left', tw(t, vv(39.1), vv(39.5)));
+  txt(ctx, '268.1934', mz(268.19) + 18, yc + hh - 20, fM(600, 24), C.ink, 'left', tw(t, vv(39.1), vv(39.5)));
   { const p = tw(t, vv(39.3), vv(39.8), E.ioC); ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1; ctx.setLineDash([3, 5]); seg(ctx, mz(268.193), yc - hh - 20, mz(268.193), yc + hh + 10, p); ctx.restore(); }
   const rx = 1180;
-  txt(ctx, '質量誤差', rx, 350, fS(700, 28), C.ink2, 'left', tw(t, vv(38.5), vv(39)));
-  counter(ctx, 2.98 * tw(t, vv(38.5), vv(39.8), E.outExpo), 2, rx, 510, 160, C.acc, 'ppm', C.ink, 0.36);
-  { const p = tw(t, vv(39.5), vv(40), E.ioC); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 1.5; poly(ctx, rectPts(rx, 552, 250, 54), p, true); ctx.restore(); txt(ctx, '< 5 ppm  ✓', rx + 125, 588, fM(600, 24), C.acc, 'center', clamp(p * 2 - 1)); }
-  reveal(ctx, '訊號與 6PPD 相近', rx, 700, { t, t0: vv(39.75), font: fS(900, 50), size: 50, dur: 0.9 });
-  txt(ctx, 'C₁₈H₂₄N₂ · 268.1934 / 268.1926 Da', rx, 756, fM(500, 22), C.ink2, 'left', tw(t, vv(40), vv(40.4)));
-  reveal(ctx, '初步跡象，仍待 6PPD 標準品比對', rx, 812, { t, t0: vv(40.25), font: fS(700, 24), size: 24, color: C.mute, stagger: 0.02 });
+  txt(ctx, '質量誤差', rx, 300, fS(700, 28), C.ink2, 'left', tw(t, vv(38.5), vv(39)));
+  counter(ctx, 1.49 * tw(t, vv(38.5), vv(39.8), E.outExpo), 2, rx, 430, 120, C.acc, 'ppm', C.ink, 0.36);
+  txt(ctx, '樣品 2 · 裝置收集之粉塵', rx, 478, fS(700, 24), C.ink2, 'left', tw(t, vv(38.8), vv(39.3)));
+  counter(ctx, 2.98 * tw(t, vv(38.9), vv(39.9), E.outExpo), 2, rx, 572, 56, C.ink, 'ppm', C.ink2, 0.45);
+  txt(ctx, '樣品 1 · 砂紙磨耗之輪胎粉塵', rx, 612, fS(700, 24), C.mute, 'left', tw(t, vv(39.1), vv(39.6)));
+  { const p = tw(t, vv(39.5), vv(40), E.ioC); ctx.save(); ctx.strokeStyle = C.acc; ctx.lineWidth = 1.5; poly(ctx, rectPts(rx, 648, 300, 50), p, true); ctx.restore(); txt(ctx, '兩組皆 < 5 ppm  ✓', rx + 150, 682, fS(700, 24), C.acc, 'center', clamp(p * 2 - 1)); }
+  reveal(ctx, '疑似 6PPD 訊號', rx, 790, { t, t0: vv(39.75), font: fS(900, 50), size: 50, dur: 0.9 });
+  txt(ctx, 'M+1 強度比高於理論值', rx, 846, fS(700, 24), C.ink2, 'left', tw(t, vv(40), vv(40.4)));
+  reveal(ctx, '仍待 6PPD 標準品比對確認', rx, 888, { t, t0: vv(40.25), font: fS(700, 24), size: 24, color: C.mute, stagger: 0.02 });
 }
 
 // ================================================================ end card (beats 76-80)
@@ -612,7 +629,7 @@ function sEnd(ctx, t) {
     ctx.save(); ctx.strokeStyle = k === 0 ? C.acc : C.ink; ctx.lineWidth = 2; ctx.strokeRect(bx, cy - bh / 2, bw, bh); if (k === 0) { ctx.fillStyle = rgba(C.acc, clamp(p)); ctx.fillRect(bx, cy - bh / 2, bw, bh); } ctx.restore(); });
   reveal(ctx, 'TRWP', cx, 610, { t, t0: t0 + 0.35, font: fM(600, 120), size: 120, align: 'center', ls: 30, stagger: 0.06 });
   reveal(ctx, '為非廢氣排放提供硬體解決方案', cx, 700, { t, t0: t0 + 0.7, font: fS(900, 44), size: 44, align: 'center', stagger: 0.04 });
-  txt(ctx, 'A HARDWARE APPROACH TO NON-EXHAUST EMISSIONS', cx, 752, fM(500, 20), C.acc, 'center', tw(t, t0 + 0.95, t0 + 1.5), 4);
+  if (LANG !== 'en') txt(ctx, 'A HARDWARE APPROACH TO NON-EXHAUST EMISSIONS', cx, 752, fM(500, 20), C.acc, 'center', tw(t, t0 + 0.95, t0 + 1.5), 4);
   reveal(ctx, '主動式輪胎磨損微粒靜電捕捉裝置', cx, 830, { t, t0: t0 + 1.1, font: fS(700, 32), size: 32, align: 'center', color: C.ink2, stagger: 0.02 });
   if (!EDIT.LONG) txt(ctx, '中原大學機械系 · 指導教授 杜哲怡', cx, 890, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.35, t0 + 1.9));
   if (!EDIT.LONG) txt(ctx, '專題生 陳睿瑀 · 李恩 · 林子鈞', cx, 932, fS(700, 24), C.mute, 'center', tw(t, t0 + 1.5, t0 + 2.05));
@@ -643,7 +660,7 @@ function sLNews(ctx, t) {
   items.forEach(([d, h, src], i) => { const t0 = i * 0.12, p = tw(u, t0, t0 + 0.5, E.outC), y = 330 + i * 150 + (1 - p) * 30;
     ctx.save(); ctx.globalAlpha = p; ctx.strokeStyle = C.acc; ctx.lineWidth = 2; seg(ctx, 140, y - 40, 140, y + 50); ctx.restore();
     txt(ctx, d, 170, y - 10, fM(500, 22), C.acc, 'left', p, 3);
-    txt(ctx, h[0] + ([' ', ' ', '', '，'][i]) + h[1], 170, y + 36, fS(900, 38), C.ink, 'left', p);   // re-join the two card lines as one sentence
+    txt(ctx, LANG === 'en' ? tr(h[0]) + [' ', ': ', ' ', ' '][i] + tr(h[1]) : h[0] + ([' ', ' ', '', '，'][i]) + h[1], 170, y + 36, fS(900, 38), C.ink, 'left', p);   // re-join the two card lines as one sentence
     txt(ctx, '資料來源：' + src, 172, y + 76, fS(700, 20), C.mute, 'left', p); });
   bullet(ctx, 140, 940, tw(u, 0.7, 1.1));
   reveal(ctx, '這些報導，都與輪胎磨損微粒有關', 170, 940, { t: u, t0: 0.8, font: fS(900, 34), size: 34, color: C.acc, stagger: 0.025 });
@@ -1016,7 +1033,7 @@ function sTMontage(ctx, t) {
   else if (k === 3) { tireLine(ctx, 620, 540, 200, -t * 9, u, -1, 0.3); txt(ctx, '≈', 920, 600, fM(500, 100), C.acc, 'left', tw(u, 0.1, 0.4)); counter(ctx, 27.6 * tw(u, 0.2, 1.3, E.outExpo), 0, 990, 600, 180, C.acc, '%', C.ink);
     cap('動態測試', '輪轂馬達 350 RPM · 三次測試平均捕捉效率'); }
   else { ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.5; seg(ctx, 400, 700, 1000, 700); ctx.strokeStyle = C.acc; ctx.lineWidth = 3; for (const [dx, h] of [[120, 260], [260, 70], [400, 26], [520, 10]]) seg(ctx, 400 + dx, 700, 400 + dx, 700 - h * tw(u, 0.1, 0.8, E.outC)); ctx.restore();
-    txt(ctx, '2.98', 1120, 600, fM(600, 150), C.acc, 'left', tw(u, 0.3, 0.6)); txt(ctx, 'ppm', 1500, 600, fM(500, 48), C.ink, 'left', tw(u, 0.4, 0.7)); cap('質譜比對', '樣本訊號與 6PPD 相近，仍待標準品確認'); }
+    txt(ctx, '1.49', 1120, 600, fM(600, 150), C.acc, 'left', tw(u, 0.3, 0.6)); txt(ctx, 'ppm', 1500, 600, fM(500, 48), C.ink, 'left', tw(u, 0.4, 0.7)); cap('質譜比對', '裝置收集之粉塵出現疑似 6PPD 訊號，仍待標準品確認'); }
 }
 
 function sTTitle(ctx, t) {
