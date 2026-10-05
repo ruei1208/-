@@ -796,8 +796,11 @@ function sMethod(ctx, t) {
   cols.forEach(([n, h, a, b, c], i) => { const x = 140 + i * 560, y = 360, t0 = s(0.8) + i * B(0.7), p = tw(t, t0, t0 + 0.8, E.ioC);
     frame(ctx, x, y, 520, 360, p);
     const cx = x + 260;
-    txt(ctx, n, cx - 12, y + 74, fM(600, 44), C.acc, 'right', tw(t, t0 + 0.2, t0 + 0.6));
-    reveal(ctx, h, cx + 12, y + 72, { t, t0: t0 + 0.2, font: fS(900, 44), size: 44, stagger: 0.05 });
+    // number and title centred as one group over the card
+    const mw = (str, font) => { ctx.save(); ctx.font = font; const w = ctx.measureText(str).width; ctx.restore(); return w; };
+    const nw = mw(n, fM(600, 44)), hw = mw(tr(h), fS(900, 44)), hx = cx - (nw + 24 + hw) / 2;
+    txt(ctx, n, hx, y + 74, fM(600, 44), C.acc, 'left', tw(t, t0 + 0.2, t0 + 0.6));
+    reveal(ctx, h, hx + nw + 24, y + 72, { t, t0: t0 + 0.2, font: fS(900, 44), size: 44, stagger: 0.05 });
     // pictogram
     const gx = x + [135, 115, 100][i], gy = y + 140, gp = tw(t, t0 + 0.3, t0 + 1, E.ioC); ctx.save(); ctx.strokeStyle = C.ink2; ctx.lineWidth = 1.6;
     if (i === 0) { poly(ctx, [[gx, gy + 20], [gx + 200, gy + 20]], gp); poly(ctx, [[gx, gy + 60], [gx + 200, gy + 60]], gp); ctx.strokeStyle = C.acc; for (let k = 0; k < 3; k++) seg(ctx, gx + 250 + k * 18, gy + 10, gx + 250 + k * 18, gy + 70, gp); ctx.strokeStyle = C.ink2; arc(ctx, gx - 18, gy + 40, 18, 0, TAU, gp); }
